@@ -27,8 +27,15 @@ export class AwsCdkSampleStack extends cdk.Stack {
       visibilityTimeout: cdk.Duration.seconds(300)
     });
 
+    // SNSトピックを定義。
+    // SNSトピックとは、配信者から受信者へ
+    // メッセージ配信を提供するマネージドサービスのこと。
     const topic = new sns.Topic(this, 'AwsCdkSampleTopic');
 
+    // SNSサブスクリプションをSNSトピックに追加
+    // トピックと配信対象のエンドポイントを紐づけるデータのこと。
+    // ここではエンドポイントにQueueを指定しているので、
+    // トピックから発行したメッセージは、Queueに登録される。
     topic.addSubscription(new subs.SqsSubscription(queue));
   }
 }
