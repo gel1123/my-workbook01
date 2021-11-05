@@ -18,4 +18,20 @@ new OsenchiStack(app, 'OsenchiStack', {
   // env: { account: '123456789012', region: 'us-east-1' },
 
   /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
+
+  /**
+   * デプロイ先を明示的に指定。
+   * cdkコマンドに profileオプション を渡すと、
+   * 環境変数からリージョンとアカウントを取得できる。
+   * 
+   * スタックのインスタンス作成時にアカウントとリージョン情報を渡さないと、
+   * SSMパラメータストアから情報を取得するときなどに、
+   * エラーが生じる。
+   * 参考サイト1：https://qiita.com/mitsuoka0423/items/325dfe91e7073b358435
+   * 参考サイト2：https://qiita.com/kai_kou/items/e35fd8c6af7dff9f2624
+   */
+  env: {
+    region: process.env.CDK_DEFAULT_REGION,
+    account: process.env.CDK_DEFAULT_ACCOUNT
+  }
 });

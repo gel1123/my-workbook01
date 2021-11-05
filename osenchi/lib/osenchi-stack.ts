@@ -1,5 +1,8 @@
 import * as cdk from '@aws-cdk/core';
 import * as s3 from '@aws-cdk/aws-s3';
+import * as sns from '@aws-cdk/aws-sns';
+import * as subscriptions from '@aws-cdk/aws-sns-subscriptions';
+import { StringParameter } from '@aws-cdk/aws-ssm';
 
 export class OsenchiStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -29,5 +32,19 @@ export class OsenchiStack extends cdk.Stack {
      */
     const outputBucket: s3.Bucket = new s3.Bucket(this, 'OsenchiOutputBucket', {
     });
+
+    /**
+     * SNSでeメール通知を行うためのSNSトピック。
+     */
+    const emailTopic = new sns.Topic(this, 'Topic', {
+      topicName: 'osenchi-topic'
+    });
+
+    /**
+     * 通知先email。
+     * メアドのハードコートを避けたいので、AWS Systems Mangaerのパラメータストアから情報を取得する。
+     */
+    const email = StringParameter.valueFromLookup(this, '/Studying/email/address01');
+    emailTopic.addSubscription(new subscriptions.EmailSubscription(email));
   }
 }

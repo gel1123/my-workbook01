@@ -22,6 +22,9 @@
   },
   "dependencies": {
     "@aws-cdk/aws-s3": "^1.130.0",
+    "@aws-cdk/aws-sns": "^1.130.0",
+    "@aws-cdk/aws-sns-subscriptions": "^1.130.0",
+    "@aws-cdk/aws-ssm": "^1.130.0",
     "@aws-cdk/core": "1.130.0",
     "source-map-support": "^0.5.16"
   }
