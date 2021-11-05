@@ -125,7 +125,7 @@ export class OsenchiStack extends cdk.Stack {
     });
 
     /**
-     * CloudWatch Events Rule.
+     * EventBridge(旧CloudWatch Events) Rule.
      * 
      * 入力用バケットのPutObjectイベントを検出するようルール定義している。
      */
@@ -144,7 +144,7 @@ export class OsenchiStack extends cdk.Stack {
     });
 
     /**
-     * CloudWatch Events Ruleで定義したイベントに対して、
+     * EventBridge(旧CloudWatch Events) Ruleで定義したイベントに対して、
      * そのイベントのターゲットを定義する。
      */
     const target = new targets.SfnStateMachine(stateMachine);
