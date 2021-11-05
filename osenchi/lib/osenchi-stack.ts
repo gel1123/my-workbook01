@@ -3,6 +3,8 @@ import * as s3 from '@aws-cdk/aws-s3';
 import * as sns from '@aws-cdk/aws-sns';
 import * as subscriptions from '@aws-cdk/aws-sns-subscriptions';
 import { StringParameter } from '@aws-cdk/aws-ssm';
+import * as sfn from '@aws-cdk/aws-stepfunctions';
+import * as tasks from '@aws-cdk/aws-stepfunctions-tasks';
 
 export class OsenchiStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -42,9 +44,59 @@ export class OsenchiStack extends cdk.Stack {
 
     /**
      * 通知先email。
-     * メアドのハードコートを避けたいので、AWS Systems Mangaerのパラメータストアから情報を取得する。
+     * メアドのハードコートを避けたいので、
+     * AWS Systems Mangaerのパラメータストアから情報を取得する。
      */
     const email = StringParameter.valueFromLookup(this, '/Studying/email/address01');
     emailTopic.addSubscription(new subscriptions.EmailSubscription(email));
+
+    const successTask = new sfn.Task(this, 'SendSuccessMail', {
+      task: new tasks.PublishToTopic(emailTopic, {
+        subject: 'Osenchi Success',
+
+        /**
+         * タスクの実行データから入力パラメータを取得している.
+         * なお引数の文字列は、インプット情報のセレクタである。
+         * AWSのドキュメントでは「JsonPath構文」という言葉で登場する。
+         * 
+         * ドル記号はJSONのルートを示す。
+         * また、その後に続くアスタリスクはすべてのプロパティを示すワイルドカードである。
+         * 
+         * 参考1：https://docs.aws.amazon.com/ja_jp/step-functions/latest/dg/input-output-inputpath-params.html
+         * 参考2：https://docs.aws.amazon.com/ja_jp/step-functions/latest/dg/amazon-states-language-paths.html
+         * 
+         * 同じ構文は、たとえばCloudWatchの構文でも出てくる。
+         * https://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html
+         * 
+         * ワイルドカードですべてのプロパティから入力を取得するので、
+         * たとえば入力が
+         * ```
+         * {
+         *   "Comment1": "hello!",
+         *   "Comment2": "hello!!",
+         *   "Comment3": "hello!!!",
+         *   "CommentArray": ["hoge","fuge","sage"]
+         * }
+         * ```
+         * なら、messageは ["hello!","hello!!","hello!!!",["hoge","fuge","sage"]] になる。
+         */
+        message: sfn.TaskInput.fromDataAt('$.*'),
+      })
+    });
+
+    /**
+     * ステートマシン（状態遷移図）
+     * 
+     * サーバレスオーケストレーションサービスであるStep Functionsは、
+     * ステートマシンとタスクで構成される。
+     * Step Functions > ステートマシン > タスク の関係。
+     * 
+     * ステートマシンはワークフローに相当。
+     * タスクは、ワークフロー内の状態を示す。
+     */
+    const stateMachine = new sfn.StateMachine(this, 'OsenchiStateMachine', {
+      definition: successTask,
+      timeout: cdk.Duration.minutes(30)
+    });
   }
 }
