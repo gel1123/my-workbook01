@@ -14,16 +14,20 @@ export class OsenchiStack extends cdk.Stack {
      * 
      * なおバケット名を省くと、ConstructIDと構造をもとにハッシュ値を計算して自動命名する。
      * S3バケットの名前の衝突を回避したいなら、自動命名を使うのも一つの手。
+     * 
+     * ### 注意！
+     * 「S3バケットの名前」はアカウント内で一意、ではなく
+     * "グローバルで一意" である必要がある。  
+     * つまり、ほかのアカウントで同名バケットを利用している人がいれば、
+     * そのバケット名は使うことができない。
      */
     const inputBucket: s3.Bucket = new s3.Bucket(this, 'OsenchiInputBucket', {
-      bucketName: 'osenchi-inputbucket'
     });
 
     /**
      * 出力バケットのインスタンス
      */
     const outputBucket: s3.Bucket = new s3.Bucket(this, 'OsenchiOutputBucket', {
-      bucketName: 'osenchi-outputbucket'
     });
   }
 }
