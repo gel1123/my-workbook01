@@ -5,6 +5,10 @@ import * as subscriptions from '@aws-cdk/aws-sns-subscriptions';
 import { StringParameter } from '@aws-cdk/aws-ssm';
 import * as sfn from '@aws-cdk/aws-stepfunctions';
 import * as tasks from '@aws-cdk/aws-stepfunctions-tasks';
+import * as cloudtrail from '@aws-cdk/aws-cloudtrail';
+import * as events from '@aws-cdk/aws-events';
+import * as targets from '@aws-cdk/aws-events-targets';
+
 
 export class OsenchiStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -98,5 +102,52 @@ export class OsenchiStack extends cdk.Stack {
       definition: successTask,
       timeout: cdk.Duration.minutes(30)
     });
+
+    /** CloudTrail用のバケット. バケット名は自動命名に任せている */
+    const logBucket = new s3.Bucket(this, 'LogBucket', {});
+
+    /** ログのためにCloudTrail用意. 単一リージョンで運用 */
+    const trail = new cloudtrail.Trail(this, 'Trail', {
+      bucket: logBucket,
+      isMultiRegionTrail: false
+    });
+
+    /**
+     * S3バケットのデータイベントをCloudTrailで検出させる。
+     * 第一引数には、対象のS3バケットの配列を指定。
+     * 第二引数には、オプションを指定する。
+     * 
+     * オプションの「readWriteType」では、検出するデータイベントのタイプ指定ができる。
+     * ここでは書き込みイベントだけ検出するように指定している。
+     */
+    trail.addS3EventSelector([{bucket:inputBucket}], {
+      readWriteType: cloudtrail.ReadWriteType.WRITE_ONLY
+    });
+
+    /**
+     * CloudWatch Events Rule.
+     * 
+     * 入力用バケットのPutObjectイベントを検出するようルール定義している。
+     */
+    const rule = new events.Rule(this, 'EventRule', {
+      eventPattern: {
+        source: ['aws.s3'],
+        detailType: ["AWS API Call via CloudTrail"],
+        detail: {
+          'eventSource': ['s3.amazonaws.com'],
+          'eventName': ['PutObject'],
+          'requestParameters': {
+            'bucketName': [inputBucket.bucketName]
+          }
+        }
+      }
+    });
+
+    /**
+     * CloudWatch Events Ruleで定義したイベントに対して、
+     * そのイベントのターゲットを定義する。
+     */
+    const target = new targets.SfnStateMachine(stateMachine);
+    rule.addTarget(target);
   }
 }
