@@ -1,5 +1,4 @@
 import * as aws from 'aws-sdk';
-import { String10Chars } from 'aws-sdk/clients/mobileanalytics';
 
 /**
  * 感情分析用Lambdaのコアロジック.

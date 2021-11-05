@@ -10,6 +10,7 @@ import * as events from '@aws-cdk/aws-events';
 import * as targets from '@aws-cdk/aws-events-targets';
 import * as lambda from '@aws-cdk/aws-lambda';
 import * as iam from '@aws-cdk/aws-iam';
+import { Chain, Task } from '@aws-cdk/aws-stepfunctions';
 
 
 export class OsenchiStack extends cdk.Stack {
@@ -56,55 +57,6 @@ export class OsenchiStack extends cdk.Stack {
     const email = StringParameter.valueFromLookup(this, '/Studying/email/address01');
     emailTopic.addSubscription(new subscriptions.EmailSubscription(email));
 
-    const successTask = new sfn.Task(this, 'SendSuccessMail', {
-      task: new tasks.PublishToTopic(emailTopic, {
-        subject: 'Osenchi Success',
-
-        /**
-         * タスクの実行データから入力パラメータを取得している.
-         * なお引数の文字列は、インプット情報のセレクタである。
-         * AWSのドキュメントでは「JsonPath構文」という言葉で登場する。
-         * 
-         * ドル記号はJSONのルートを示す。
-         * また、その後に続くアスタリスクはすべてのプロパティを示すワイルドカードである。
-         * 
-         * 参考1：https://docs.aws.amazon.com/ja_jp/step-functions/latest/dg/input-output-inputpath-params.html
-         * 参考2：https://docs.aws.amazon.com/ja_jp/step-functions/latest/dg/amazon-states-language-paths.html
-         * 
-         * 同じ構文は、たとえばCloudWatchの構文でも出てくる。
-         * https://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html
-         * 
-         * ワイルドカードですべてのプロパティから入力を取得するので、
-         * たとえば入力が
-         * ```
-         * {
-         *   "Comment1": "hello!",
-         *   "Comment2": "hello!!",
-         *   "Comment3": "hello!!!",
-         *   "CommentArray": ["hoge","fuge","sage"]
-         * }
-         * ```
-         * なら、messageは ["hello!","hello!!","hello!!!",["hoge","fuge","sage"]] になる。
-         */
-        message: sfn.TaskInput.fromDataAt('$.*'),
-      })
-    });
-
-    /**
-     * ステートマシン（状態遷移図）
-     * 
-     * サーバレスオーケストレーションサービスであるStep Functionsは、
-     * ステートマシンとタスクで構成される。
-     * Step Functions > ステートマシン > タスク の関係。
-     * 
-     * ステートマシンはワークフローに相当。
-     * タスクは、ワークフロー内の状態を示す。
-     */
-    const stateMachine = new sfn.StateMachine(this, 'OsenchiStateMachine', {
-      definition: successTask,
-      timeout: cdk.Duration.minutes(30)
-    });
-
     /** CloudTrail用のバケット. バケット名は自動命名に任せている */
     const logBucket = new s3.Bucket(this, 'LogBucket', {});
 
@@ -146,13 +98,6 @@ export class OsenchiStack extends cdk.Stack {
     });
 
     /**
-     * EventBridge(旧CloudWatch Events) Ruleで定義したイベントに対して、
-     * そのイベントのターゲットを定義する。
-     */
-    const target = new targets.SfnStateMachine(stateMachine);
-    rule.addTarget(target);
-
-    /**
      * 感情分析用Lambda
      */
     const detectionFunc = new lambda.Function(this, 'DetectionFunc', {
@@ -192,7 +137,7 @@ export class OsenchiStack extends cdk.Stack {
       code: lambda.Code.fromAsset('functions/delete-object', {
         exclude: ['*.ts']
       }),
-      handler: 'index-handler',
+      handler: 'index.handler',
       runtime: lambda.Runtime.NODEJS_12_X
     });
 
@@ -207,5 +152,109 @@ export class OsenchiStack extends cdk.Stack {
     detectionFunc.addToRolePolicy(policy);
     // 入力ファイル削除LambdaにS3アクセス権限を付与する。
     outputBucket.grantDelete(deletionFunc);
+
+    const successTask = new sfn.Task(this, 'SendSuccessMail', {
+      task: new tasks.PublishToTopic(emailTopic, {
+        subject: 'Osenchi Success',
+
+        /**
+         * ステートマシン（ワークフロー）に組込む最終成功時Task。
+         * 
+         * タスクの実行データから入力パラメータを取得している.
+         * なお引数の文字列は、インプット情報のセレクタである。
+         * AWSのドキュメントでは「JsonPath構文」という言葉で登場する。
+         * 
+         * ドル記号はJSONのルートを示す。
+         * また、その後に続くアスタリスクはすべてのプロパティを示すワイルドカードである。
+         * 
+         * 参考1：https://docs.aws.amazon.com/ja_jp/step-functions/latest/dg/input-output-inputpath-params.html
+         * 参考2：https://docs.aws.amazon.com/ja_jp/step-functions/latest/dg/amazon-states-language-paths.html
+         * 
+         * 同じ構文は、たとえばCloudWatchの構文でも出てくる。
+         * https://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/logs/FilterAndPatternSyntax.html
+         * 
+         * ワイルドカードですべてのプロパティから入力を取得するので、
+         * たとえば入力が
+         * ```
+         * {
+         *   "Comment1": "hello!",
+         *   "Comment2": "hello!!",
+         *   "Comment3": "hello!!!",
+         *   "CommentArray": ["hoge","fuge","sage"]
+         * }
+         * ```
+         * なら、messageは ["hello!","hello!!","hello!!!",["hoge","fuge","sage"]] になる。
+         */
+        message: sfn.TaskInput.fromDataAt('$.*'),
+      })
+    });
+
+    /**
+     * ステートマシン（ワークフロー）に組込むTask。
+     * 感情分析LambdaをTaskに組み込んでいる。
+     */
+    const sentimentTask: sfn.Task = new sfn.Task(this, 'DetectSentiment', {
+      task: new tasks.InvokeFunction(detectionFunc)
+    });
+
+    /**
+     * ステートマシン（ワークフロー）に組込むTask。
+     * 感情分析の入力としてS3にアップしたJSONを削除するLambdaを組み込んでいる。
+     */
+    const deleteTask: sfn.Task = new sfn.Task(this, 'DeleteTask', {
+      task: new tasks.InvokeFunction(deletionFunc)
+    });
+
+    /** 感情分析失敗時のエラー通知タスク */
+    const errorTask: sfn.Task = new sfn.Task(this, 'errorTask', {
+      task: new tasks.PublishToTopic(emailTopic, {
+        subject: 'Osenchi Error',
+        message: sfn.TaskInput.fromDataAt('$.*')
+      })
+    });
+
+    /**
+     * ステートマシン（ワークフロー）を定義。
+     * 
+     * なおステートマシンに「どのタスクをどういう順番／ルールで
+     * 組み込んでいくか」というルールのことを、
+     * ASL（Amazon States Language）と呼んでいる。
+     * 
+     * ステートマシンの実体はこの「ASL」と「TASK」であるともいえる。
+     * ```
+     * StepFunctions > StateMachine === ASLとTaskの組み合わせ
+     * ```
+     */
+    const mainFlow: Chain = sentimentTask.next(deleteTask).next(successTask);
+    const parallel = new sfn.Parallel(this, 'Parallel');
+    parallel.branch(mainFlow);
+    parallel.addCatch(errorTask, { resultPath: '$.error' });
+
+    /**
+     * ステートマシン（状態遷移図）
+     * 
+     * サーバレスオーケストレーションサービスであるStep Functionsは、
+     * ステートマシンとタスクで構成される。
+     * Step Functions > ステートマシン > タスク の関係。
+     * 
+     * ステートマシンはワークフローに相当。
+     * タスクは、ワークフロー内の状態を示す。
+     */
+    const stateMachine = new sfn.StateMachine(this, 'OsenchiStateMachine', {
+      definition: parallel,
+      timeout: cdk.Duration.minutes(30)
+    });
+
+    /**
+     * EventBridge(旧CloudWatch Events) Ruleで定義したイベントに対して、
+     * そのイベントのターゲットを定義する。
+     * 
+     * ここでのターゲットはStepFunctionsで構築した感情分析ステートマシン。
+     * EventBridgeルールには、S3入力用バケットへのPUTイベントを定義しているため、
+     * 「S3入力用バケットへPUTされたら、targetに指定したStepFunctionsを実行する」
+     * という挙動になっている。
+     */
+     const target = new targets.SfnStateMachine(stateMachine);
+     rule.addTarget(target);
   }
 }
