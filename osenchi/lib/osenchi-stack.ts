@@ -8,6 +8,8 @@ import * as tasks from '@aws-cdk/aws-stepfunctions-tasks';
 import * as cloudtrail from '@aws-cdk/aws-cloudtrail';
 import * as events from '@aws-cdk/aws-events';
 import * as targets from '@aws-cdk/aws-events-targets';
+import * as lambda from '@aws-cdk/aws-lambda';
+import * as iam from '@aws-cdk/aws-iam';
 
 
 export class OsenchiStack extends cdk.Stack {
@@ -149,5 +151,61 @@ export class OsenchiStack extends cdk.Stack {
      */
     const target = new targets.SfnStateMachine(stateMachine);
     rule.addTarget(target);
+
+    /**
+     * 感情分析用Lambda
+     */
+    const detectionFunc = new lambda.Function(this, 'DetectionFunc', {
+      functionName: 'osenchi-detect-sentiment',
+
+      /**
+       * Lambda関数を格納したフォルダを指定。
+       * TypeScriptで書いているので、デプロイ時に不要なtsファイルは除外する
+       */
+      code: lambda.Code.fromAsset('functions/detect-sentiment', {
+        exclude: ['*.ts']
+      }),
+
+      /**
+       * Lambda実行時のエントリポイント.
+       * 今回は、トランスパイルされたindex.jsがexportするhandlerモジュールを指定
+       */
+      handler: 'index.handler',
+
+      runtime: lambda.Runtime.NODEJS_12_X,
+      timeout: cdk.Duration.minutes(5),
+
+      /**
+       * Lambdaが利用する環境変数。
+       * 今回は、感情分析結果の保存先バケットを環境変数で指定させる。
+       */
+      environment: {
+        DEST_BUCKET: outputBucket.bucketName
+      }
+    });
+
+    /**
+     * 入力ファイル削除用Lambda
+     */
+    const deletionFunc = new lambda.Function(this, 'DeletionFunc', {
+      functionName: 'osenchi-delete-object',
+      code: lambda.Code.fromAsset('functions/delete-object', {
+        exclude: ['*.ts']
+      }),
+      handler: 'index-handler',
+      runtime: lambda.Runtime.NODEJS_12_X
+    });
+
+    // 感情分析LambdaにS3アクセス権限を付与する
+    inputBucket.grantRead(detectionFunc);
+    outputBucket.grantWrite(detectionFunc);
+    // 感情分析LambdaにComprehendを利用できるロールを付与する
+    const policy = new iam.PolicyStatement({
+      resources: ['*'],
+      actions: ['comprehend:BatchDetectSentiment']
+    });
+    detectionFunc.addToRolePolicy(policy);
+    // 入力ファイル削除LambdaにS3アクセス権限を付与する。
+    outputBucket.grantDelete(deletionFunc);
   }
 }
