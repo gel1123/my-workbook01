@@ -142,17 +142,17 @@ export class OsenchiStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_12_X
     });
 
-    // 感情分析LambdaにS3アクセス権限を付与する
+    // 感情分析LambdaのIAMロールに、S3アクセス権限を付与する
     inputBucket.grantRead(detectionFunc);
     outputBucket.grantWrite(detectionFunc);
-    // 感情分析LambdaにComprehendを利用できるロールを付与する
+    // 感情分析LambdaのIAMロールに、Comprehend権限を付与する
     const policy = new iam.PolicyStatement({
       resources: ['*'],
       actions: ['comprehend:BatchDetectSentiment']
     });
     detectionFunc.addToRolePolicy(policy);
-    // 入力ファイル削除LambdaにS3アクセス権限を付与する。
-    outputBucket.grantDelete(deletionFunc);
+    // 入力ファイル削除LambdaのIAMロールに、S3アクセス権限を付与する。
+    inputBucket.grantDelete(deletionFunc);
 
     const successTask = new sfn.Task(this, 'SendSuccessMail', {
       task: new tasks.PublishToTopic(emailTopic, {
