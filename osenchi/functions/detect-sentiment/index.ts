@@ -38,6 +38,7 @@ export interface IStateResponse {
     srcBucket: string;
     objectKey: string;
     destBucket: string;
+    sentiment: string;
 }
 
 /**
@@ -58,6 +59,13 @@ export async function handler(event: IStateRequest): Promise<IStateResponse> {
          */
         destBucket: process.env.DEST_BUCKET!
     };
-    await JobExecutor.execute(job);
-    return job;
+    const body = await JobExecutor.execute(job);
+    const result: IStateResponse = {
+        id: job.id,
+        srcBucket: job.srcBucket,
+        objectKey: job.objectKey,
+        destBucket: job.destBucket,
+        sentiment: body
+    };
+    return result;
 }

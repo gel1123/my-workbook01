@@ -39,7 +39,7 @@ interface IComprehend {
 }
 
 export class JobExecutor {
-    public static async execute(job: IJobParameter): Promise<void> {
+    public static async execute(job: IJobParameter): Promise<string> {
         const items: IComprehend[] = await JobExecutor.getItems(job.srcBucket, job.objectKey);
 
         /** キーが言語、値が入力配列 */
@@ -61,7 +61,8 @@ export class JobExecutor {
             // arr[1] はMapの値なので、ここではComprehend[]
             await JobExecutor.detectSentiment(ary[0], ary[1]);
         }
-        await JobExecutor.putJsonLines(job.destBucket, job.objectKey, items);
+        const body: string = await JobExecutor.putJsonLines(job.destBucket, job.objectKey, items);
+        return body;
     }
 
     /**
@@ -164,7 +165,7 @@ export class JobExecutor {
      * @param objectKey 
      * @param items 
      */
-    private static async putJsonLines(destBucket: string, objectKey: string, items: IComprehend[]): Promise<void> {
+    private static async putJsonLines(destBucket: string, objectKey: string, items: IComprehend[]): Promise<string> {
         const lines: string[] = [];
         items.forEach(item => {
             const line = JSON.stringify(item);
@@ -176,5 +177,7 @@ export class JobExecutor {
             Key: objectKey,
             Body: lines.join('\n')
         }).promise();
+
+        return lines.join('\n');
     }
 }

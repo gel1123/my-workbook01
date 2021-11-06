@@ -11,6 +11,7 @@ export interface IStateInfo {
     id: string;
     srcBucket: string;
     objectKey: string;
+    sentiment: string;
 }
 
 /**
