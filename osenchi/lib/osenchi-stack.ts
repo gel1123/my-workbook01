@@ -81,7 +81,8 @@ export class OsenchiStack extends cdk.Stack {
     /**
      * EventBridge(旧CloudWatch Events) Rule.
      * 
-     * 入力用バケットのPutObjectイベントを検出するようルール定義している。
+     * 入力用バケットのPutObjectイベントを
+     * CloudTrailを経由して検出するようルール定義している。
      */
     const rule = new events.Rule(this, 'EventRule', {
       eventPattern: {
