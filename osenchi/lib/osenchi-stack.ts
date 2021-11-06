@@ -200,7 +200,8 @@ export class OsenchiStack extends cdk.Stack {
      * ```
      */
     const sentimentTask = new tasks.LambdaInvoke(this, 'DetectSentiment', {
-      lambdaFunction: detectionFunc
+      lambdaFunction: detectionFunc,
+      payload:sfn.TaskInput.fromJsonPathAt('$')
     });
 
     /**
@@ -208,7 +209,8 @@ export class OsenchiStack extends cdk.Stack {
      * 感情分析の入力としてS3にアップしたJSONを削除するLambdaを組み込んでいる。
      */
     const deleteTask = new tasks.LambdaInvoke(this, 'DeleteTask', {
-      lambdaFunction: deletionFunc
+      lambdaFunction: deletionFunc,
+      payload:sfn.TaskInput.fromJsonPathAt('$.Payload')
     });
 
     /**
