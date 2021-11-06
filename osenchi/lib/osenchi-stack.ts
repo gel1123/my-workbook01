@@ -201,6 +201,7 @@ export class OsenchiStack extends cdk.Stack {
      */
     const sentimentTask = new tasks.LambdaInvoke(this, 'DetectSentiment', {
       lambdaFunction: detectionFunc,
+      // 入力JSONをすべて取得。デフォルト値なので、下記は省略しても同じ動きとなる。
       payload:sfn.TaskInput.fromJsonPathAt('$')
     });
 
@@ -210,6 +211,16 @@ export class OsenchiStack extends cdk.Stack {
      */
     const deleteTask = new tasks.LambdaInvoke(this, 'DeleteTask', {
       lambdaFunction: deletionFunc,
+      // 入力JSONのうち、プロパティ「Payload」のJSONを取得。
+      // 非推奨となった [@aws-cdk/aws-stepfunctions >> Task] を使ったタスク定義
+      // が生成するASLでは、下記参考サイトにおける「方法1: Resourceに関数のARNを直接書く」
+      // のASLが生成されていたため、Payload参照は不要であったが、
+      // 現在推奨されている LambdaInvoke では、参考サイトにおける
+      // 「方法2: Parameters.FunctionNameに関数名を書く」に相当するASLが生成
+      // されるので、この場合、利用する引数はPayload配下になる。
+      //
+      // 参考サイト：
+      // https://dev.classmethod.jp/articles/differences-between-2-ways-of-invoking-lambda-functions-with-step-functions/
       payload:sfn.TaskInput.fromJsonPathAt('$.Payload')
     });
 
