@@ -1,6 +1,6 @@
 {
   "name": "nsvueapp01",
-  "main": "main.js",
+  "main": "./src/main.ts",
   "version": "1.0.0",
   "description": "A native application built with NativeScript-Vue",
   "author": "gel1123 <atno.14@gmail.com>",
@@ -9,7 +9,6 @@
     "@nativescript/core": "~8.1.5",
     "@nativescript/theme": "^2.3.3",
     "@vue/devtools": "^5.3.3",
-    "clean-webpack-plugin": "^4.0.0",
     "nativescript-socketio": "^3.3.1",
     "nativescript-toasty": "^3.0.0-alpha.2",
     "nativescript-vue": "^2.8.1",
@@ -22,14 +21,14 @@
     "@nativescript/android": "8.1.1",
     "@nativescript/types": "~8.1.1",
     "@nativescript/webpack": "~5.0.0",
+    "@triniwiz/nativescript-socketio": "^5.0.1",
     "@types/node": "^14.6.2",
     "babel-loader": "^8.1.0",
     "nativescript-dev-babel": "^0.2.1",
     "nativescript-dev-typescript": "^0.10.0",
     "nativescript-vue-template-compiler": "^2.8.1",
-    "nativescript-worker-loader": "~0.12.1",
     "sass": "^1.26.10",
-    "typescript": "^3.9.7",
+    "typescript": "~4.3.5",
     "vue": "^2.6.12",
     "vue-loader": "^15.9.3"
   }
