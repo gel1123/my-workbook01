@@ -38,15 +38,27 @@
 import { action } from "@nativescript/core";
 
 interface Todo {
-  name: string;
-  description: string;
+  name?: string;
+  description?: string;
 }
-export default {
-  data(): {
-    ToDos: Todo[];
-    textFieldNameValue: string;
-    textFieldDescriptionValue: string;
-  } {
+
+interface AppData {
+  ToDos?: Todo[];
+  textFieldNameValue?: string;
+  textFieldDescriptionValue?: string;
+}
+
+interface AppMethods extends AppData {
+  onButtonTap(): Promise<void>;
+  reset(): void;
+  onDoneTap(event: { index: number; item: Todo }): Promise<void>;
+}
+
+const AppExtendDefault: {
+  data(): AppData;
+  methods: AppMethods;
+} = {
+  data(): AppData {
     return {
       ToDos: [],
       textFieldNameValue: "",
@@ -54,14 +66,14 @@ export default {
     };
   },
   methods: {
-    async onButtonTap() {
+    async onButtonTap(): Promise<void> {
       if (
         this.textFieldNameValue === "" ||
         this.textFieldDescriptionValue === ""
       )
         return;
       try {
-        await alert({
+        alert({
           title: "追加メッセージ",
           message: `${this.textFieldNameValue}を追加しました`,
           okButtonText: "OK",
@@ -70,14 +82,14 @@ export default {
         console.error(e);
       }
       // ToDoを追加する
-      this.ToDos.push({
+      this.ToDos?.push({
         name: this.textFieldNameValue,
         description: this.textFieldDescriptionValue,
       });
       // ToDo追加後、テキストフィールドを空にする
       this.reset();
     },
-    reset() {
+    reset(): void {
       this.textFieldNameValue = "";
       this.textFieldDescriptionValue = "";
     },
@@ -92,7 +104,7 @@ export default {
         switch (result) {
           case deleteToDoMessage:
             // event : https://nativescript-vue.org/ja/docs/elements/components/list-view/#events
-            this.ToDos.splice(event.index, 1);
+            this.ToDos?.splice(event.index, 1);
             break;
           case cancelMessage:
             break;
@@ -103,6 +115,8 @@ export default {
     },
   },
 };
+
+export default AppExtendDefault;
 </script>
 
 <style scoped>
