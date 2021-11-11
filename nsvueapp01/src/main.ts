@@ -2,7 +2,7 @@ import Vue from 'nativescript-vue'
 import App from './components/App.vue'
 import VueDevtools from 'nativescript-vue-devtools'
 
-var TNS_ENV: string | undefined = TNS_ENV || undefined;
+console.log(`---------------------- [TNS_ENV: ${TNS_ENV} ] ----------------------`);
 if (TNS_ENV !== 'production') {
   Vue.use(VueDevtools, { host: '10.0.3.2' })
 }
