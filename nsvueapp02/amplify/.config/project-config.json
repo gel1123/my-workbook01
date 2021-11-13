@@ -1,0 +1,17 @@
+{
+  "projectName": "nsvueapp02Amplify",
+  "version": "3.1",
+  "frontend": "javascript",
+  "javascript": {
+    "framework": "vue",
+    "config": {
+      "SourceDir": "./",
+      "DistributionDir": "dist",
+      "BuildCommand": "yarn build",
+      "StartCommand": "yarn export && yarn serve"
+    }
+  },
+  "providers": [
+    "awscloudformation"
+  ]
+}
