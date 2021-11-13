@@ -4,7 +4,7 @@ import VueDevtools from 'nativescript-vue-devtools'
 
 console.log(`---------------------- [TNS_ENV: ${TNS_ENV} ] ----------------------`);
 if(TNS_ENV !== 'production') {
-  Vue.use(VueDevtools)
+  Vue.use(VueDevtools, { host: '10.0.3.2' })
 }
 
 

@@ -14,12 +14,19 @@
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 	<uses-permission android:name="android.permission.INTERNET"/>
 
+
+	<!-- ## VueDevToolsを動かすためのメモ -->
+	<!-- On Android API level 28 and above, cleartext traffic is disabled by default. In order to connect to Vue DevTools you will have to add android:usesCleartextTraffic="true" -->
+	<!-- ↑ https://nativescript-vue.org/en/docs/getting-started/vue-devtools/#troubleshooting -->
+
 	<application
 		android:name="com.tns.NativeScriptApplication"
 		android:allowBackup="true"
 		android:icon="@drawable/icon"
 		android:label="@string/app_name"
-		android:theme="@style/AppTheme">
+		android:theme="@style/AppTheme"
+		android:usesCleartextTraffic="true"
+		>
 
 		<activity
 			android:name="com.tns.NativeScriptActivity"
