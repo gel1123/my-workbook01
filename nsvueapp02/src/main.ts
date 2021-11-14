@@ -13,8 +13,12 @@ import VueDevtools from 'nativescript-vue-devtools'
 const FontIcon = require('nativescript-vue-fonticon');
 import './app.scss'
 
+import { Carousel, CarouselItem } from 'nativescript-carousel'
+
+Vue.registerElement('Carousel', () => Carousel)
+Vue.registerElement('CarouselItem', () => CarouselItem)
+
 Vue.use(FontIcon, {
-  host: '10.0.3.2',
   componentName: 'FIcon',
   debug: true,
   paths: {
