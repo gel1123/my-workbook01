@@ -25,6 +25,8 @@
     "@nativescript/webpack": "~5.0.0",
     "@types/node": "^14.6.2",
     "babel-loader": "^8.1.0",
+    "nativescript-material-icons": "^1.0.3",
+    "nativescript-vue-fonticon": "^1.0.3",
     "nativescript-vue-template-compiler": "^2.8.1",
     "nativescript-worker-loader": "~0.12.1",
     "sass": "^1.26.10",
