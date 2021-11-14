@@ -1,5 +1,5 @@
 import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
-import { createUser, updateUser } from '../../../src/graphql/mutations'
+import { createUser, updateUser } from '../../graphql/mutations'
 
 const isCreateUserResult = (res: any): res is GraphQLResult<{ createUser: string }> => {
     return !!(res as GraphQLResult<{ createUser: string }>)?.data?.createUser;

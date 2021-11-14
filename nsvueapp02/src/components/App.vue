@@ -1,9 +1,11 @@
 <template>
   <Page>
     <ActionBar title="Welcome to NativeScript-Vue!" />
-    <label class="mdi" text="home" />
-    <label class="mdi" text="favorite_border" />
-    <label class="mdi" text="person_outline" />
+    <StackLayout>
+      <Label class="mdi" text="home" />
+      <Label class="mdi" text="favorite_border" />
+      <Label class="mdi" text="person_outline" />
+    </StackLayout>
   </Page>
 </template>
 

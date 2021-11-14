@@ -1,5 +1,5 @@
 import API, { graphqlOperation, GraphQLResult } from '@aws-amplify/api'
-import { getItem, listItems, } from '../../../src/graphql/queries'
+import { getItem, listItems, } from '../../graphql/queries'
 
 const isListItemsResult = (res: any): res is GraphQLResult<{
     listItems: {
