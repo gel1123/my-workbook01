@@ -1,24 +1,9 @@
 <template>
   <Page>
-    <ActionBar>
-      <GridLayout width="100%" columns="auto, *">
-        <Label
-          text="MENU"
-          @tap="$refs.drawer.nativeView.showDrawer()"
-          col="0"
-        />
-        <Label class="title" text="---- page.2 ----" col="1" />
-      </GridLayout>
-    </ActionBar>
-
+    <!-- 参考：/node_modules/nativescript-ui-sidedrawer/index.d.ts -->
+    <AppHeader @clickMenu="$refs.drawer.nativeView.toggleDrawerState()" />
     <RadSideDrawer ref="drawer">
-      <StackLayout ~drawerContent backgroundColor="#ffffff">
-        <Label class="drawer-header" text="Drawer" />
-        <Label class="drawer-item" text="Item 1" @tap="onClickLink1()" />
-        <Label class="drawer-item" text="Item 2" @tap="onClickLink2()" />
-        <Label class="drawer-item" text="Item 3" @tap="onClickLink3()" />
-      </StackLayout>
-
+      <SideDrawerStack @onNav="nav" />
       <GridLayout ~mainContent columns="*" rows="*">
         <Label class="message" :text="msg" col="0" row="0" />
       </GridLayout>
@@ -27,47 +12,57 @@
 </template>
 
 <script lang="ts">
+import SideDrawerStack from "@/components/SideDrawerStack.vue";
+import AppHeader from "@/components/AppHeader.vue";
 import { NativeScriptVue } from "nativescript-vue";
 import { VueConstructor } from "vue";
-import Page1 from "@/pages/Page1.vue";
-import Page3 from "@/pages/Page3.vue";
+import Page1, { IPage1 } from "@/pages/Page1.vue";
+import Page3, { IPage3 } from "@/pages/Page3.vue";
 
 interface IData {
   msg?: string;
 }
 interface IMethods extends IData {
-  onClickLink1(): void;
-  onClickLink2(): void;
-  onClickLink3(): void;
+  nav(page: string): void;
 }
-interface IApp {
+export interface IPage2 {
+  name: string;
+  components: object;
   data(): IData;
   methods: IMethods;
 }
-const Page2: IApp = {
+const Page2: IPage2 = {
+  name: "page2",
+  components: { SideDrawerStack, AppHeader },
   data() {
     return {
-      msg: "Hello World!",
+      msg: "here is page.2",
     };
   },
   methods: {
-    onClickLink1() {
-      (this as IMethods & NativeScriptVue).$navigateTo(
-        Page1 as IApp & VueConstructor,
-        { frame: "app-frame" }
-      );
-    },
-    onClickLink2() {
-      (this as IMethods & NativeScriptVue).$navigateTo(
-        Page2 as IApp & VueConstructor,
-        { frame: "app-frame" }
-      );
-    },
-    onClickLink3() {
-      (this as IMethods & NativeScriptVue).$navigateTo(
-        Page3 as IApp & VueConstructor,
-        { frame: "app-frame" }
-      );
+    nav(page) {
+      switch (page) {
+        case "page1":
+          (this as IMethods & NativeScriptVue).$navigateTo(
+            Page1 as IPage1 & VueConstructor,
+            { frame: "app-frame", clearHistory: true }
+          );
+          break;
+        case "page2":
+          (this as IMethods & NativeScriptVue).$navigateTo(
+            Page2 as IPage2 & VueConstructor,
+            { frame: "app-frame", clearHistory: true }
+          );
+          break;
+        case "page3":
+          (this as IMethods & NativeScriptVue).$navigateTo(
+            Page3 as IPage3 & VueConstructor,
+            { frame: "app-frame", clearHistory: true }
+          );
+          break;
+        default:
+          break;
+      }
     },
   },
 };
@@ -75,34 +70,10 @@ export default Page2;
 </script>
 
 <style scoped>
-ActionBar {
-  background-color: #53ba82;
-  color: #ffffff;
-}
-
-.title {
-  text-align: left;
-  padding-left: 16;
-}
-
 .message {
   vertical-align: center;
   text-align: center;
   font-size: 20;
-  color: #333333;
-}
-
-.drawer-header {
-  padding: 50 16 16 16;
-  margin-bottom: 16;
-  background-color: #53ba82;
-  color: #ffffff;
-  font-size: 24;
-}
-
-.drawer-item {
-  padding: 8 16;
-  color: #333333;
-  font-size: 16;
+  color: green;
 }
 </style>
