@@ -5,6 +5,9 @@
   "description": "A native application built with NativeScript-Vue",
   "author": "gel1123 <atno.14@gmail.com>",
   "license": "MIT",
+  "nativescript": {
+    "id": "org.nativescript.sigapplication"
+  },
   "dependencies": {
     "@nativescript/core": "~8.1.1",
     "@nativescript/theme": "^2.3.3",

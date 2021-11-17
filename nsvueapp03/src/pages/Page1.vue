@@ -4,7 +4,7 @@
     <AppHeader @clickMenu="$refs.drawer.nativeView.toggleDrawerState()" />
     <RadSideDrawer ref="drawer">
       <SideDrawerStack @onNav="nav" />
-      <GridLayout ~mainContent columns="*" rows="*">
+      <WrapLayout ~mainContent>
         <Label
           class="message"
           :text="msg"
@@ -13,7 +13,7 @@
           @tap="reloadMsg"
           textWrap="true"
         />
-      </GridLayout>
+      </WrapLayout>
     </RadSideDrawer>
   </Page>
 </template>
@@ -26,6 +26,7 @@ import { VueConstructor } from "vue";
 import Page2, { IPage2 } from "@/pages/Page2.vue";
 import Page3, { IPage3 } from "@/pages/Page3.vue";
 // import p from "nativescript-powerinfo";
+import app from "@/main";
 
 /****************************
  * ## How to access Native API
@@ -52,44 +53,81 @@ const Page1: IPage1 = {
   components: { SideDrawerStack, AppHeader },
   data() {
     return {
-      msg: "hoge",
+      msg: "tap!",
     };
   },
   methods: {
     reloadMsg() {
-      const intent = new android.content.Intent(
-        android.content.Intent.ACTION_VIEW
-      );
-      const powerinfo = {
-        plugged: intent.getIntExtra(
-          android.os.BatteryManager.EXTRA_PLUGGED,
-          -1
-        ),
-        percent:
-          (intent.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, -1) /
-            intent.getIntExtra(android.os.BatteryManager.EXTRA_SCALE, -1)) *
-          100,
-        level: intent.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, -1),
-        scale: intent.getIntExtra(android.os.BatteryManager.EXTRA_SCALE, -1),
-        health: intent.getIntExtra(android.os.BatteryManager.EXTRA_HEALTH, 0),
-        icon_small: intent.getIntExtra(
-          android.os.BatteryManager.EXTRA_ICON_SMALL,
-          0
-        ),
-        present: intent
-          .getExtras()
-          ?.getBoolean(android.os.BatteryManager.EXTRA_PRESENT),
-        status: intent.getIntExtra(android.os.BatteryManager.EXTRA_STATUS, 0),
-        technology: intent
-          .getExtras()
-          ?.getString(android.os.BatteryManager.EXTRA_TECHNOLOGY),
-        temperature: intent.getIntExtra(
-          android.os.BatteryManager.EXTRA_TEMPERATURE,
-          0
-        ),
-        voltage: intent.getIntExtra(android.os.BatteryManager.EXTRA_VOLTAGE, 0),
-      };
-      this.msg = `Battery: ${powerinfo.percent}%`;
+
+      let powerListener: any;
+
+      startPowerUpdates((powerinfo:any)=>{
+        this.msg = `${JSON.stringify(powerinfo, null, 4)}`;
+        stopPowerUpdates();
+      });
+
+      function stopPowerUpdates() {
+        if (powerListener) {
+          app.android.unregisterBroadcastReceiver(
+            android.content.Intent.ACTION_BATTERY_CHANGED
+          );
+          powerListener = undefined;
+        }
+      }
+      function startPowerUpdates(callback: Function) {
+        powerListener = app.android.registerBroadcastReceiver(
+          android.content.Intent.ACTION_BATTERY_CHANGED,
+          function onReceiveCallback(context, intent) {
+            callback({
+              plugged: intent.getIntExtra(
+                android.os.BatteryManager.EXTRA_PLUGGED,
+                -1
+              ),
+              percent:
+                (intent.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, -1) /
+                  intent.getIntExtra(
+                    android.os.BatteryManager.EXTRA_SCALE,
+                    -1
+                  )) *
+                100,
+              level: intent.getIntExtra(
+                android.os.BatteryManager.EXTRA_LEVEL,
+                -1
+              ),
+              scale: intent.getIntExtra(
+                android.os.BatteryManager.EXTRA_SCALE,
+                -1
+              ),
+              health: intent.getIntExtra(
+                android.os.BatteryManager.EXTRA_HEALTH,
+                0
+              ),
+              icon_small: intent.getIntExtra(
+                android.os.BatteryManager.EXTRA_ICON_SMALL,
+                0
+              ),
+              present: intent
+                .getExtras()
+                .getBoolean(android.os.BatteryManager.EXTRA_PRESENT),
+              status: intent.getIntExtra(
+                android.os.BatteryManager.EXTRA_STATUS,
+                0
+              ),
+              technology: intent
+                .getExtras()
+                .getString(android.os.BatteryManager.EXTRA_TECHNOLOGY),
+              temperature: intent.getIntExtra(
+                android.os.BatteryManager.EXTRA_TEMPERATURE,
+                0
+              ),
+              voltage: intent.getIntExtra(
+                android.os.BatteryManager.EXTRA_VOLTAGE,
+                0
+              ),
+            });
+          }
+        );
+      }
     },
     nav(page) {
       switch (page) {
@@ -122,9 +160,8 @@ export default Page1;
 
 <style scoped>
 .message {
-  vertical-align: center;
-  text-align: center;
+  text-align: left;
   font-size: 20;
-  color: red;
+  margin: 20;
 }
 </style>

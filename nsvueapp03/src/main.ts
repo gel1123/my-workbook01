@@ -1,11 +1,15 @@
 // import store from './store'
+import { Application } from "@nativescript/core";
 import Vue from 'nativescript-vue'
 import VueDevtools from 'nativescript-vue-devtools'
 import App from '@/components/App.vue'
 import { RadSideDrawer } from 'nativescript-ui-sidedrawer'
 import { VueConstructor } from 'vue';
 
-console.log(`--------------[ ${TNS_ENV}] ---------------------`)
+const app = Application;
+export default app;
+
+console.log(`--------------[ ${TNS_ENV} ] ---------------------`)
 if (TNS_ENV !== 'production') {
   Vue.use(VueDevtools, { host: '10.0.3.2' })
 }
