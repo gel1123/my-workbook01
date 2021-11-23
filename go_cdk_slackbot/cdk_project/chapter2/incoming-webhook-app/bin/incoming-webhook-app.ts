@@ -3,7 +3,21 @@ import 'source-map-support/register';
 import * as cdk from '@aws-cdk/core';
 import { SampleEc2 } from '../lib/sample-ec2';
 
-// コンパイルとデプロイで利用される
+/**
+ * コンパイルとデプロイで利用される.
+ * なお `cdk bootstrap` などのｺﾏﾝﾄﾞを実行したときに下記のようなエラーが出たら、
+ * aws-cdkパッケージのバージョン修正が必要。
+ * 
+ * ```
+ * Cloud assembly schema version mismatch: Maximum schema version supported is 14.0.0, but found 15.0.0.
+ * Please upgrade your CLI in order to interact with this app.
+ * ```
+ * 
+ * ちなみに自分の環境では、バージョン修正後に再起動してはじめてエラーが出なくなった。
+ * 
+ * 参考：
+ * https://qiita.com/honmaaax/items/d1467b1f49df2ae09b97#cloud-assembly-schema-version-mismatch-maximum-schema-version-supported-is-200-but-found-300
+ */
 async function deploy() {
 
   const app = new cdk.App();
