@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from '@aws-cdk/core';
+import { IncomingWebhookAppStack } from '../lib/incoming-webhook-app-stack';
 import { SampleEc2 } from '../lib/sample-ec2';
+import * as util from 'util'
+const exec = util.promisify(require('child_process').exec);
 
 /**
  * コンパイルとデプロイで利用される.
@@ -20,22 +23,22 @@ import { SampleEc2 } from '../lib/sample-ec2';
  */
 async function deploy() {
 
+  // Lambdaで使うGoのソースコードをビルドする
+  //
+  // ### 2021年11月末 追記
+  // GLIBCのバージョンの問題がLambda上で発生したため、オプションに「CGO_ENABLED=0」を追加した.
+  // 参考：https://github.com/aws/aws-lambda-go/issues/340
+  await exec('go get -v -t -d ./lambdaSource/... && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o ./lambdaSource/main ./lambdaSource/**.go');
+
   const app = new cdk.App();
-  new SampleEc2(app, 'SampleEc2', {
-    /* If you don't specify 'env', this stack will be environment-agnostic.
-     * Account/Region-dependent features and context lookups will not work,
-     * but a single synthesized template can be deployed anywhere. */
-  
-    /* Uncomment the next line to specialize this stack for the AWS Account
-     * and Region that are implied by the current CLI configuration. */
-    // env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
-  
-    /* Uncomment the next line if you know exactly what Account and Region you
-     * want to deploy the stack to. */
-    // env: { account: '123456789012', region: 'us-east-1' },
-  
-    /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
-  });
+
+  // スタック追加
+  new SampleEc2(app, 'SampleEc2');
+  // スタック追加
+  new IncomingWebhookAppStack(app, "IncomingWebhookAppStack");
   app.synth();
+
+  // build結果のバイナリを削除する
+  await exec('rm ./lambdaSource/main');
 }
 deploy();
