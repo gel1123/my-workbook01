@@ -4,7 +4,7 @@ package main
 
 // なお、これらのパッケージをローカルにインストールしたいなら、
 // `go mod tidy` を go.mod の存在するディレクトリで実行すればいい。
-// ※ go.modが存在しない場合は、先に `go init` ｺﾏﾝﾄﾞで、ファイルを生成すべき
+// ※ go.modが存在しない場合は、先に `go mod init` ｺﾏﾝﾄﾞで、ファイルを生成すべき
 //
 // 上記を実施済みで、かつVSCodeの拡張機能もインストール済みなら、
 // "github.com/aws/aws-lambda-go/events" のような外部パッケージも、
