@@ -19,3 +19,7 @@ new Cdkapp01Stack(app, 'Cdkapp01Stack', {
 
   /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
 });
+
+// AWS CDK にアプリからクラウドアセンぶりを合成するよう指示する
+// 参考：https://docs.aws.amazon.com/cdk/latest/guide/apps.html
+app.synth();
