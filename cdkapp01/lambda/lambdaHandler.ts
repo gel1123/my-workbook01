@@ -21,7 +21,7 @@ export async function memoHandler(memo: Memo)
     }).promise();
 }
 
-export async function writeHandler()
+export async function writeHandler(arg: any)
     : Promise<PromiseResult<sdk.DynamoDB.PutItemOutput, sdk.AWSError>> {
 
     const now = new Date();
@@ -38,7 +38,7 @@ export async function writeHandler()
 
     const newItem: PutItemInputAttributeMap = {
         memo_id: { S: "101" },
-        body: { S: `このメモは ${datestr} に作成されました。` }
+        body: { S: `このメモは ${datestr} に作成されました。引数には次の値が指定されています：${JSON.stringify(arg)}` }
     }
     const input: PutItemInput = {
         TableName: TABLE_NAME,
