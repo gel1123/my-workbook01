@@ -171,9 +171,15 @@ export class Cdkapp01Stack extends cdk.Stack {
         }
       ]
     });
+
+    /** 書き込みLambda統合 */
+    const writeApiIntegration = new api.LambdaIntegration(writeMemoLambda);
+
     /**
      * 
-     * API Gatewayのリソース「/memos」に、GET通信で memoApiIntegrationメソッド 
+     * API Gatewayのリソース「/memos」に、
+     * GET通信でメモを読み取るLambda統合と、
+     * POST通信でメモを書き込むLambda統合
      * がトリガーされるよう定義している。
      * 
      * ### rootプロパティ
@@ -187,11 +193,13 @@ export class Cdkapp01Stack extends cdk.Stack {
      * ### IResource::addMethodメソッド
      * リソースに対し、新たにメソッドを追加する。
      */
-    memoApi.root.addResource('memos').addMethod('GET', memoApiIntegration, {
+    const memos:api.Resource =  memoApi.root.addResource('memos')
+    memos.addMethod('GET', memoApiIntegration, {
       // API Gateway が受け入れるリクエストパラメータ
       requestParameters: { 'method.request.querystring.memo_id': true },
       // クライアントに返却できるレスポンス
       methodResponses: [{ statusCode: '200' }]
     });
+    memos.addMethod('POST', writeApiIntegration);
   }
 }
