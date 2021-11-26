@@ -5,9 +5,37 @@ import * as lambda from '@aws-cdk/aws-lambda';
 
 /**
  * 
+ * ## これはなに？
+ * メモを書いたり読んだりする簡単なアプリケーションを題材に、
+ * AWS CDK について学習しようとしています。
  * 
- * ▼ コーディングで参考にしたページ一覧
+ * ## 構成部品
+ * * DynamoDB
+ * * API Gateway
+ * 
+ * ## usage
+ * 
+ * ### メモIDでメモ取得：
+ * GET => [API Gateway endpoint]/memos?memo_id=xxx
+ * 
+ * 応答例：
+ * {"Item":{"memo_id":{"S":"0"},"body":{"S":"ここにメモを書きます"}}}
+ * 
+ * ### メモを新たに保存：
+ * POST => [API Gateway endpoint]/memos
+ * 
+ * ## コーディングで参考にさせていただいたページ一覧
+ * 
+ * ### CDK全般
  * * https://qiita.com/yoppie_x/items/4636d4ed360473e58b30
+ * * https://dev.classmethod.jp/articles/aws-cdk-101-typescript/
+ * 
+ * ### CDKにおけるDynamoDB
+ * * https://itotetsu.hatenablog.com/entry/amazon-dynamodb-via-aws-cdk
+ * 
+ * ### DynamoDB自体
+ * * https://dev.classmethod.jp/articles/re-introduction-2020-amazon-dynamodb/
+ * 
  */
 export class Cdkapp01Stack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -20,22 +48,47 @@ export class Cdkapp01Stack extends cdk.Stack {
         type: dyanmo.AttributeType.STRING
       },
       billingMode: dyanmo.BillingMode.PAY_PER_REQUEST,
-      tableName: 'memo'
+      tableName: 'memo',
+
+      /**
+       * データがある状態でスタックを削除しようとしたときの挙動を定義。
+       * 
+       * * RETAIN：テーブルを削除しない（本番環境での推奨）
+       * * DESTROY：データごとテーブルを削除する
+       * * SNAPSHOT：削除する代わりにすナップショットを保存する（ただしDynamoでは使用不可）
+       * 
+       * 参考：https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-attribute-deletionpolicy.html#aws-attribute-deletionpolicy-options
+       */
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+
+      /** PITRを有効にすると、35日前までのバックアップからテーブル復元が可能 */
+      pointInTimeRecovery: false
     });
 
-    /** Lambdaの定義 */
+    /** Lambdaに渡す環境変数 */
+    const environment = {
+      TABLE_NAME: memoTable.tableName,
+      REGION: 'ap-northeast-1'
+    };
+
+    /** メモを読むLambda */
     const memoLambda = new lambda.Function(this, 'memoLambda', {
       code: lambda.Code.fromAsset('lambda'), // Lambdaソースのパス指定
       handler: 'lambdaHandler.memoHandler', // 発火させたいメソッド指定
       runtime: lambda.Runtime.NODEJS_12_X, // Lambda実行環境
-      environment: { // 環境変数
-        TABLE_NAME: memoTable.tableName,
-        REGION: 'ap-northeast-1'
-      }
+      environment: environment // 環境変数
+    });
+    /** メモを書くLambda */
+    const writeMemoLambda = new lambda.Function(this, 'writeMemoLambda', {
+      code: lambda.Code.fromAsset('lambda'),
+      handler: 'lambdaHandler.writeHandler',
+      runtime: lambda.Runtime.NODEJS_12_X,
+      environment: environment // 環境変数
     });
 
-    // Dynamoのメモ用テーブルに、Lambdaが読み書きできるよう権限を付与
-    memoTable.grantReadWriteData(memoLambda);
+    // Lambdaに権限付与
+    memoTable.grantReadData(memoLambda);
+    memoTable.grantWriteData(writeMemoLambda);
 
     /**
      * Amazon API Gateway の定義
