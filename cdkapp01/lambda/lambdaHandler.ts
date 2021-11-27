@@ -77,14 +77,15 @@ export interface proxyRes {
  * プロキシ統合でAPI Gatewayに組み込むので、
  * 応答を特定の形式にする必要がある。
  * 
- * また、プロキシ統合で組込むためasync関数ではなく、通常の関数として定義する...つもりだが、
- * 色々確認してからにする。
+ * また、プロキシ統合で組込むためasync関数ではなく、通常の関数として定義する...つもりだったが、
+ * どうやらそういう意味ではなかったらしい。
+ * 勉強中...
  * 
  * @param req 
  * @returns 
  */
-export function writeHandler(req: proxyReq)
-    : proxyRes {
+export async function writeHandler(req: proxyReq)
+    : Promise<proxyRes> {
 
 
     const now = new Date();
@@ -108,7 +109,7 @@ export function writeHandler(req: proxyReq)
         Item: newItem
     }
     // ---- ※補足 ----
-    // asyncではない関数内で、いきなり下記のようにawaitを使うのはNG!
+    // もしこれがasyncではない関数だったら、awaitを使うのはNG!
     //
     // ```
     // const result = await Dynamo.putItem(input).promise();
@@ -125,10 +126,14 @@ export function writeHandler(req: proxyReq)
     // 参考：https://qiita.com/jun1s/items/ecf6965398e00b246249
     //
 
-    const result: sdk.Request<sdk.DynamoDB.PutItemOutput, sdk.AWSError> = Dynamo.putItem(input);
+    const result = await Dynamo.putItem(input).promise();
     const res: proxyRes = {
         statusCode: 200,
-        body: `${result.startTime.getMinutes()}分：実行開始`
+        body: `${result.$response.httpResponse.body}, 
+${result.$response.httpResponse.statusCode}, 
+${result.$response.httpResponse.statusMessage},
+${JSON.stringify(result.$response.httpResponse.headers)}`
     }
+    console.log("original:", res);
     return res;
 }
