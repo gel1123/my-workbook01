@@ -15,10 +15,10 @@ import * as lambda from '@aws-cdk/aws-lambda';
  * 
  * ## usage
  * 
- * ### メモIDでメモ取得：
+ * ### メモIDでメモ取得： //TODO 例が古いので要更新
  * GET => [API Gateway endpoint]/memos?memo_id=xxx
  * 
- * 応答例：
+ * 応答例： //TODO 例が古いので要更新
  * {"Item":{"memo_id":{"S":"0"},"body":{"S":"ここにメモを書きます"}}}
  * 
  * ### メモを新たに保存：
@@ -35,6 +35,7 @@ import * as lambda from '@aws-cdk/aws-lambda';
  * 
  * ### DynamoDB自体
  * * https://dev.classmethod.jp/articles/re-introduction-2020-amazon-dynamodb/
+ * * https://hack-le.com/dynamodb-query/
  * 
  */
 export class Cdkapp01Stack extends cdk.Stack {
@@ -56,7 +57,11 @@ export class Cdkapp01Stack extends cdk.Stack {
      */
     const memoTable = new dyanmo.Table(this, 'memoTable', {
       partitionKey: {
-        name: 'memo_id',
+        name: 'user_id',
+        type: dyanmo.AttributeType.STRING
+      },
+      sortKey: {
+        name: 'fullpath',
         type: dyanmo.AttributeType.STRING
       },
       billingMode: dyanmo.BillingMode.PAY_PER_REQUEST,
@@ -136,8 +141,10 @@ export class Cdkapp01Stack extends cdk.Stack {
       //
       // ※なおここではJSONPath式からプレフィックス「$」を除去した記法を使うことができる
       requestParameters: {
-        'integration.request.querystring.memo_id': // 統合リクエストのクエリ文字列
-          'method.request.querystring.memo_id' // メソッドリクエストのクエリ文字列
+        'integration.request.querystring.user_id': // 統合リクエストのクエリ文字列
+          'method.request.querystring.user_id', // メソッドリクエストのクエリ文字列
+        'integration.request.querystring.fullpath':
+          'method.request.querystring.fullpath'
       },
 
       // 指定された MIME タイプのリクエストペイロード用のマッピングテンプレートを指定する
@@ -147,15 +154,16 @@ export class Cdkapp01Stack extends cdk.Stack {
           JSON.stringify({
             // 参考：API Gateway マッピングテンプレートとアクセスのログ記録の変数リファレンス
             // https://docs.aws.amazon.com/ja_jp/apigateway/latest/developerguide/api-gateway-mapping-template-reference.html
-            memo_id:
+            user_id:
               // セキュリティ対策としてエスケープを行う
               "$util.escapeJavaScript("
 
-              // すべてのリクエストのパラメータマップのうち「memo_id」を取得.
+              // すべてのリクエストのパラメータマップのうち「user_id」を取得.
               // なおここで $input.params(パラメータ名) で狙った値を取得できるのは、
               // 前述のrequestParametersで、統合リクエストのクエリ文字列を設定しているから。
-              + "$input.params('memo_id')"
-              + ")"
+              + "$input.params('user_id')"
+              + ")",
+            fullpath: "$util.escapeJavaScript($input.params('fullpath'))"
           })
       },
       /**
@@ -205,10 +213,13 @@ export class Cdkapp01Stack extends cdk.Stack {
      * ### IResource::addMethodメソッド
      * リソースに対し、新たにメソッドを追加する。
      */
-    const memos:api.Resource =  readApi.root.addResource('memos')
+    const memos: api.Resource = readApi.root.addResource('memos')
     memos.addMethod('GET', readApiIntegration, {
       // API Gateway が受け入れるリクエストパラメータ
-      requestParameters: { 'method.request.querystring.memo_id': true },
+      requestParameters: {
+        'method.request.querystring.user_id': true,
+        'method.request.querystring.fullpath': true
+      },
       // クライアントに返却できるレスポンス
       methodResponses: [{ statusCode: '200' }]
     });

@@ -9,7 +9,8 @@ const Dynamo = new sdk.DynamoDB({
 });
 
 export interface Memo {
-    memo_id: string
+    user_id: string;
+    fullpath: string;
 }
 
 /**
@@ -30,7 +31,10 @@ export async function readHandler(memo: Memo)
     // 参考：https://qiita.com/taqm/items/f22ee3c3f0fb3d433a85
     return Dynamo.getItem({
         TableName: TABLE_NAME,
-        Key: { memo_id: { S: memo.memo_id } }
+        Key: {
+            user_id: { S: memo.user_id },
+            fullpath: { S: memo.fullpath }
+        }
     }).promise();
 }
 
@@ -97,11 +101,27 @@ export async function writeHandler(req: proxyReq)
         E: "日_月_火_水_木_金_土".split("_")[now.getDay()]
     }
     /** 例：2021年11月26日（金曜日）8時45分 */
-    const datestr = `${d.YYYY}年${d.M}月${d.D}日（${d.E}曜日）${d.H}時${d.m}分`;
+    const datestrJa = `${d.YYYY}年${d.M}月${d.D}日（${d.E}曜日）${d.H}時${d.m}分`;
+    /** 例：2021-11-26-8-45 */
+    const datestr = `${d.YYYY}-${d.M}-${d.D}-${d.H}-${d.m}`;
 
     const newItem: PutItemInputAttributeMap = {
-        memo_id: { S: "101" },
-        body: { S: `このメモは ${datestr} に作成されました。引数には次の値が指定されています：${JSON.stringify(req)}` }
+        user_id: { S: "0" }, // PK
+        fullpath: { S: "/sample-dir/sample-title" }, // SK
+        category: { S: "sample-category" },
+        tags: { SS: ["sample-tag1", "sample-tag2", "sample-tag3"] },
+        body: { S: `このメモは ${datestrJa} に作成されました。引数には次の値が指定されています：${JSON.stringify(req)}` },
+        user_name: { S: "sample-user" },
+        lastUpdated: { S: datestr },
+        lastAccess: { S: datestr },
+        created: { S: datestr },
+        references: {
+            SS: [
+                "https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/best-practices.html",
+                "https://aws.amazon.com/jp/blogs/news/operating-lambda-design-principles-in-event-driven-architectures-part-2/",
+                "https://docs.aws.amazon.com/ja_jp/apigateway/latest/developerguide/welcome.html",
+            ]
+        }
     }
     const input: PutItemInput = {
         TableName: TABLE_NAME,
