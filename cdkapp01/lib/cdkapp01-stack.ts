@@ -33,9 +33,17 @@ import * as lambda from '@aws-cdk/aws-lambda';
  * ### CDKにおけるDynamoDB
  * * https://itotetsu.hatenablog.com/entry/amazon-dynamodb-via-aws-cdk
  * 
+ * ### CDKとRoute53
+ * * https://dev.classmethod.jp/articles/aws-cdk-all-resources-for-api-gateway/
+ * 
  * ### DynamoDB自体
  * * https://dev.classmethod.jp/articles/re-introduction-2020-amazon-dynamodb/
  * * https://hack-le.com/dynamodb-query/
+ * 
+ * ### TODO
+ * * Route53との連携もCDKでやりたい
+ * * 利用者に表示する時刻に時差を反映
+ * * サーバ側の日時を確実に国際標準時にする
  * 
  */
 export class Cdkapp01Stack extends cdk.Stack {
@@ -55,7 +63,7 @@ export class Cdkapp01Stack extends cdk.Stack {
      * ### テクニック_複合ソートキー
      * 今度書きます...
      */
-    const memoTable = new dyanmo.Table(this, 'memoTable', {
+    const memoTable = new dyanmo.Table(this, 'MEMO', {
       partitionKey: {
         name: 'user_id',
         type: dyanmo.AttributeType.STRING
@@ -65,7 +73,7 @@ export class Cdkapp01Stack extends cdk.Stack {
         type: dyanmo.AttributeType.STRING
       },
       billingMode: dyanmo.BillingMode.PAY_PER_REQUEST,
-      tableName: 'memo',
+      tableName: 'MEMO',
 
       /**
        * データがある状態でスタックを削除しようとしたときの挙動を定義。
