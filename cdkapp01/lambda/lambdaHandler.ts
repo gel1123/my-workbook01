@@ -1,7 +1,6 @@
 import * as sdk from 'aws-sdk';
 import { PutItemInput, PutItemInputAttributeMap } from 'aws-sdk/clients/dynamodb';
 import { PromiseResult } from 'aws-sdk/lib/request';
-import { callbackify } from 'util';
 
 const Region = process.env.REGION!;
 const TABLE_NAME = process.env.TABLE_NAME!;
@@ -22,7 +21,7 @@ export interface Memo {
  * 未実装だが参考にすべきリンク：
  *   [DynamoDB でのエラー処理](https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/Programming.Errors.html)
  */
-export async function memoHandler(memo: Memo)
+export async function readHandler(memo: Memo)
     : Promise<PromiseResult<sdk.DynamoDB.GetItemOutput, sdk.AWSError>> {
 
     // 最後に実行している aws-sdk >> Request::promiseメソッドは、
@@ -111,11 +110,7 @@ export async function writeHandler(req: proxyReq)
     // ---- ※補足 ----
     // もしこれがasyncではない関数だったら、awaitを使うのはNG!
     //
-    // ```
-    // const result = await Dynamo.putItem(input).promise();
-    // ```
-    //
-    // これは awaitがさながら Step Functions のように動作するからである。
+    // なぜならこれは awaitがさながら Step Functions のように動作するからである。
     // awaitはいっけん「同期的に動く」ように見えるが、
     // その実、「非同期で動く」ものである。
     // そのためasyncではない関数で使うことは、できない。
@@ -126,6 +121,24 @@ export async function writeHandler(req: proxyReq)
     // 参考：https://qiita.com/jun1s/items/ecf6965398e00b246249
     //
 
+    /**
+     * DynamoDBの更新結果。
+     * 
+     * ### 応答例
+     * * result.$response.httpResponse.body：{}
+     * * result.$response.httpResponse.statusCode: 200
+     * * result.$response.httpResponse.statusMessage: "OK"
+     * * result.$response.httpResponse.headers: {
+     *     "server":"Server",
+     *     "date":"Sat, 27 Nov 2021 21:10:21 GMT",
+     *     "content-type":"application/x-amz-json-1.0",
+     *     "content-length":"2",
+     *     "connection":"keep-alive",
+     *     "x-amzn-requestid":"xxxxxxxxxxxxx",
+     *     "x-amz-crc32":"1111111"
+     * }%
+     * 
+     */
     const result = await Dynamo.putItem(input).promise();
     const res: proxyRes = {
         statusCode: 200,

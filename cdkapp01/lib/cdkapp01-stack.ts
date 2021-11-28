@@ -41,7 +41,19 @@ export class Cdkapp01Stack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    /** DynamoDBの定義 */
+    /**
+     * DynamoDBの定義.
+     * 
+     *  + パーティションキー：
+     *  + ソートキー：
+     *  + プライマリーキー：
+     *  + 想定している属性例：
+     *  + GSI：なし
+     *  + LSI：なし
+     * 
+     * ### テクニック_複合ソートキー
+     * 今度書きます...
+     */
     const memoTable = new dyanmo.Table(this, 'memoTable', {
       partitionKey: {
         name: 'memo_id',
@@ -72,9 +84,9 @@ export class Cdkapp01Stack extends cdk.Stack {
     };
 
     /** メモを読むLambda */
-    const memoLambda = new lambda.Function(this, 'memoLambda', {
+    const readLambda = new lambda.Function(this, 'readLambda', {
       code: lambda.Code.fromAsset('lambda'), // Lambdaソースのパス指定
-      handler: 'lambdaHandler.memoHandler', // 発火させたいメソッド指定
+      handler: 'lambdaHandler.readHandler', // 発火させたいメソッド指定
       runtime: lambda.Runtime.NODEJS_12_X, // Lambda実行環境
       environment: environment // 環境変数
     });
@@ -87,7 +99,7 @@ export class Cdkapp01Stack extends cdk.Stack {
     });
 
     // Lambdaに権限付与
-    memoTable.grantReadData(memoLambda);
+    memoTable.grantReadData(readLambda);
     memoTable.grantWriteData(writeMemoLambda);
 
     /**
@@ -109,14 +121,14 @@ export class Cdkapp01Stack extends cdk.Stack {
      *     それに沿った形式の応答を返すことが必要。
      *     なお指定しないとデフォルトで使用する（true）ことになる。
      */
-    const memoApi = new api.LambdaRestApi(this, 'memoApi', {
-      handler: memoLambda,
+    const readApi = new api.LambdaRestApi(this, 'readApi', {
+      handler: readLambda,
       proxy: false
     });
     /**
      * API Gateway へのリクエストを処理するLambda統合の定義。
      */
-    const memoApiIntegration = new api.LambdaIntegration(memoLambda, {
+    const readApiIntegration = new api.LambdaIntegration(readLambda, {
       proxy: false,
 
       // メソッドリクエストデータを統合リクエストパラメータにマップする
@@ -193,8 +205,8 @@ export class Cdkapp01Stack extends cdk.Stack {
      * ### IResource::addMethodメソッド
      * リソースに対し、新たにメソッドを追加する。
      */
-    const memos:api.Resource =  memoApi.root.addResource('memos')
-    memos.addMethod('GET', memoApiIntegration, {
+    const memos:api.Resource =  readApi.root.addResource('memos')
+    memos.addMethod('GET', readApiIntegration, {
       // API Gateway が受け入れるリクエストパラメータ
       requestParameters: { 'method.request.querystring.memo_id': true },
       // クライアントに返却できるレスポンス
