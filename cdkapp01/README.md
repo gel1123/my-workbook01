@@ -1,14 +1,28 @@
-# Welcome to your CDK TypeScript project!
+### Dynamo設計検討メモ
+欲しい可能性が微弱にでも存在するカラムは...
 
-This is a blank project for TypeScript development with CDK.
+* ユーザ名
+* 更新日
+* メモの本文
+* メモのタイトル
+* 作成日時
+* 最終更新日時
+* 共同編集ユーザのリスト
+* 文字数
+* 任意タグを格納するリスト
+* メモの公開状況
+* メモの通知予定日時
+* 通知方法リスト
+* Star数
+* メモの文字数
+* メモの感情分析結果
+* メモの主要な言語
+* メモの翻訳結果リスト
+* メモの読み上げURL
+* メモの参考URLリスト
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+パーティションキーはユーザ名。
+ソートキーには作成日時を指定する。
 
-## Useful commands
-
- * `npm run build`   compile typescript to js
- * `npm run watch`   watch for changes and compile
- * `npm run test`    perform the jest unit tests
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk synth`       emits the synthesized CloudFormation template
+LSIには最終更新日時を設定したい。
+GSIはStar数...?
