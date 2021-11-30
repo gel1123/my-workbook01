@@ -3,6 +3,13 @@ import 'source-map-support/register';
 import * as cdk from '@aws-cdk/core';
 import { Cdkapp01Stack } from '../lib/cdkapp01-stack';
 
+/**
+ * デプロイ実行時には、次のようなｺﾏﾝﾄﾞを打つことを想定して実装している。
+ * 
+ * ```
+ * cdk deploy --profile studying --context hostZoneName=hogehoge.com
+ * ```
+ */
 const app = new cdk.App();
 new Cdkapp01Stack(app, 'Cdkapp01Stack', {
   /* If you don't specify 'env', this stack will be environment-agnostic.
@@ -41,6 +48,6 @@ new Cdkapp01Stack(app, 'Cdkapp01Stack', {
   }
 });
 
-// AWS CDK にアプリからクラウドアセンぶりを合成するよう指示する
+// AWS CDK にアプリからクラウドアセンブリを合成するよう指示する
 // 参考：https://docs.aws.amazon.com/cdk/latest/guide/apps.html
 app.synth();

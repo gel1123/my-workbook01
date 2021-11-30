@@ -257,13 +257,34 @@ export class Cdkapp01Stack extends cdk.Stack {
      *   想定どおりの動きになってくれない場合がある。
      * 
      * ```
+     * // 例：ここで下記のようにパラメータストアから取得するつもりでいると...
+     * const hostZoneName = StringParameter.valueFromLookup(this, "/Studying/route53/hostzone/name/001");
+     * // 後続処理で API Gateway のカスタムドメイン設定時に次のエラーが出る
      * Error: Domain name does not support uppercase letters. Got: cdk01api01.dummy-value-for-/XXXX/XXXX/XX
      * ```
      * 
      * これについてはaws-cdkリポジトリに[Issue](https://github.com/aws/aws-cdk/issues/9138)
      * がたてられており、2021年11月末時点ではOPENのままである。
+     * 
+     * ___________________________________
+     * 
+     * 上記の経緯により、ここでは context から値を取得するようにしている。  
+     * 参考：[実践！AWS CDK #4 Context  | DevelopersIO](https://dev.classmethod.jp/articles/cdk-practice-4-context/)
+     * 
+     * ただし、cdk.jsonにホストゾーン名を載せたくなかったので、
+     * CDKｺﾏﾝﾄﾞの --context オプションから値を取得する想定でいる。
+     * 
+     * 下記のように CDKｺﾏﾝﾄﾞを実行することで、hostZoneNameをContextとして取得できる
+     * 
+     * ```
+     * # ※ 下記のcontextオプションは「-c」で縮めて書くこともできる
+     * cdk deploy --context hostZoneName=hogehoge.com
+     * ```
      */
-    const hostZoneName = StringParameter.valueFromLookup(this, "/Studying/route53/hostzone/name/001");
+    const hostZoneName = this.node.tryGetContext("hostZoneName");
+    if (!hostZoneName || "string" !== typeof hostZoneName) {
+      throw new Error("context [hostZoneName] is invalid.");
+    }
     console.log("hostZoneName is => " + hostZoneName);
 
     /**
