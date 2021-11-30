@@ -5,7 +5,7 @@ import * as lambda from '@aws-cdk/aws-lambda';
 import * as route53 from '@aws-cdk/aws-route53';
 import * as acm from "@aws-cdk/aws-certificatemanager";
 import * as route53Targets from "@aws-cdk/aws-route53-targets";
-import { StringParameter } from "@aws-cdk/aws-ssm"
+// import { StringParameter } from "@aws-cdk/aws-ssm"
 
 /**
  * 
@@ -44,11 +44,27 @@ import { StringParameter } from "@aws-cdk/aws-ssm"
  * * https://dev.classmethod.jp/articles/re-introduction-2020-amazon-dynamodb/
  * * https://hack-le.com/dynamodb-query/
  * 
+ * ### REST API設計
+ * * [翻訳: WebAPI 設計のベストプラクティス](https://qiita.com/mserizawa/items/b833e407d89abd21ee72)
+ * 
  * ### TODO
- * * Route53との連携もCDKでやりたい
- * * HTTPS化
+ * * ~Route53との連携もCDKでやりたい~
+ * * ~HTTPS化~ <= そもそもAPI Gatewayでカスタムドメイン使うなら、必ずHTTPSにする必要があった
  * * 利用者に表示する時刻に時差を反映
  * * サーバ側の日時を確実に国際標準時にする
+ * * CI/CD構築
+ * * CloudWatchとの連携
+ * * S3 + CloudFront構成でなにか
+ * * StepFunctionsでなにか
+ * * API Gatewayのカスタムドメインを、ステージごとに複数APIマッピングする
+ * * API GatewayのURLに、APIのバージョンを含める1
+ * * API Gatewayのデプロイするステージを、デプロイ時に指定できるようにする
+ * * API Gatewayのデプロイするバージョンを、デプロイ時に指定できるようにする
+ * * 開発環境のデプロイ時に、誤って本番環境を消してしまったり上書いてしまわないようにする
+ * * 本番環境で、スムーズに漸進リリースできるようにする（漸進のつもりが「一度削除して全アップデート」とならないように...!）
+ * 
+ * #### 別スタックで、だけど後日やってみたいこと
+ * * EC2スポットインスタンスを活用するためのCDKスタック作成
  * 
  */
 export class Cdkapp01Stack extends cdk.Stack {
@@ -150,6 +166,7 @@ export class Cdkapp01Stack extends cdk.Stack {
         api.EndpointType.REGIONAL
       ]
     });
+
     /**
      * API Gateway へのリクエストを処理するLambda統合の定義。
      */
@@ -232,6 +249,28 @@ export class Cdkapp01Stack extends cdk.Stack {
      * 
      * ### IResource::addMethodメソッド
      * リソースに対し、新たにメソッドを追加する。
+     * 
+     * ## そのほか覚書
+     * 下記の参考リンクによると、REST APIは次のようにあるべきだとされている。
+     * [参考 => 翻訳: WebAPI 設計のベストプラクティス](https://qiita.com/mserizawa/items/b833e407d89abd21ee72)
+     * 
+     * * REST API においてエンドポイントの名前は複数形がいい。  
+     *   なぜなら、取得単位に応じて person/people のような単複変換を扱うのは手間がかかるから
+     * 
+     * * URLにはAPIのバージョンを含めるべき。  
+     *   これには次のメリットがある
+     *     * 開発速度アップ
+     *     * 廃止済みのリクエストを弾く実装が簡単
+     *     * アップデート時の移行期間を設けるのが簡単
+     * 
+     * ### API Gatewayのバージョン管理について
+     * 参考：[API Gateway – Lambda 構成のバージョン管理について教えてください | DevelopersIO](https://dev.classmethod.jp/articles/tsnote-lambda-apigw-version-control/)
+     * 
+     * ポイント：
+     * * APIGatewayとLambda関数は、それぞれ別々に管理されている。
+     *     * API Gatewayには「デプロイ」と「ステージ」
+     *     * Lambdaには「バージョン」と「エイリアス」
+     * 
      */
     const memos: api.Resource = cdkApp01Api01.root.addResource('memos')
     memos.addMethod('GET', readApiIntegration, {
