@@ -2,6 +2,10 @@ import * as cdk from '@aws-cdk/core';
 import * as api from '@aws-cdk/aws-apigateway';
 import * as dyanmo from '@aws-cdk/aws-dynamodb';
 import * as lambda from '@aws-cdk/aws-lambda';
+import * as route53 from '@aws-cdk/aws-route53';
+import * as acm from "@aws-cdk/aws-certificatemanager";
+import * as route53Targets from "@aws-cdk/aws-route53-targets";
+import { StringParameter } from "@aws-cdk/aws-ssm"
 
 /**
  * 
@@ -42,6 +46,7 @@ import * as lambda from '@aws-cdk/aws-lambda';
  * 
  * ### TODO
  * * Route53との連携もCDKでやりたい
+ * * HTTPS化
  * * 利用者に表示する時刻に時差を反映
  * * サーバ側の日時を確実に国際標準時にする
  * 
@@ -133,10 +138,17 @@ export class Cdkapp01Stack extends cdk.Stack {
      *     統合プロキシ使用有無。統合プロキシを使用する設定だと、
      *     それに沿った形式の応答を返すことが必要。
      *     なお指定しないとデフォルトで使用する（true）ことになる。
+     * 
+     * * endpointTypes:
+     *     API Gatewayのエンドポイントタイプ。
+     *     指定なしの場合「EDGE」になるが、今回はSSL証明書の関係でREGIONALとする。
      */
-    const readApi = new api.LambdaRestApi(this, 'readApi', {
+    const cdkApp01Api01 = new api.LambdaRestApi(this, 'cdkApp01Api01', {
       handler: readLambda,
-      proxy: false
+      proxy: false,
+      endpointTypes: [
+        api.EndpointType.REGIONAL
+      ]
     });
     /**
      * API Gateway へのリクエストを処理するLambda統合の定義。
@@ -221,7 +233,7 @@ export class Cdkapp01Stack extends cdk.Stack {
      * ### IResource::addMethodメソッド
      * リソースに対し、新たにメソッドを追加する。
      */
-    const memos: api.Resource = readApi.root.addResource('memos')
+    const memos: api.Resource = cdkApp01Api01.root.addResource('memos')
     memos.addMethod('GET', readApiIntegration, {
       // API Gateway が受け入れるリクエストパラメータ
       requestParameters: {
@@ -232,5 +244,80 @@ export class Cdkapp01Stack extends cdk.Stack {
       methodResponses: [{ statusCode: '200' }]
     });
     memos.addMethod('POST', writeApiIntegration);
+
+
+    /**
+     * ホストゾーンの名前をパラメータストアから取得している。
+     * ...だが、パラメータストアから値を取得するタイミングの問題により、
+     * 使い方によっては、うまくデプロイできないことがあるので、
+     * どう使うかは少し検討すべき
+     * 
+     * ※たとえばAPI Gateway のカスタムドメインの名前に、パラメータストアから取得する値を指定すると、
+     *   パラメータストアから実際に値を取得するより先に、下記のようなエラーが生じて、
+     *   想定どおりの動きになってくれない場合がある。
+     * 
+     * ```
+     * Error: Domain name does not support uppercase letters. Got: cdk01api01.dummy-value-for-/XXXX/XXXX/XX
+     * ```
+     * 
+     * これについてはaws-cdkリポジトリに[Issue](https://github.com/aws/aws-cdk/issues/9138)
+     * がたてられており、2021年11月末時点ではOPENのままである。
+     */
+    const hostZoneName = StringParameter.valueFromLookup(this, "/Studying/route53/hostzone/name/001");
+    console.log("hostZoneName is => " + hostZoneName);
+
+    /**
+     * Route53に定義済みの既存ホストゾーンのインポート。
+     * 
+     * ### コードを書くにあたって参考にしたページ
+     * * [CDK公式ドキュメント | @aws-cdk/aws-route53 ](https://docs.aws.amazon.com/cdk/api/latest/docs/aws-route53-readme.html)
+     * * [WS CDK + TypeScript で Route 53 にサブドメインのホストゾーンを作成してレコード追加する方法と やってみてハマったところ、分かったこと｜ふじい](https://note.com/dafujii/n/ne1595c74bcc7)
+     * 
+     * 
+     * ### 補足
+     * ホストゾーンとは、ドメイン／サブドメインのルーティングを定義するコンテナのこと。
+     * 参考：https://www.acrovision.jp/service/aws/?p=1568
+     * 
+     * 当初ホストゾーンのインポートを「route53.HostedZone.fromHostedZoneId()」で行おうとしたが、その場合
+     * 後述のコードでホストゾーン名を「zone.zoneName」で取得する際に、次のようなエラーが出ることが分かった。
+     * 
+     * ```
+     * HostedZone.fromHostedZoneId doesn't support "zoneName"
+     * ```
+     */
+    const zone = route53.HostedZone.fromLookup(this, "cdkapp01zone", {
+      domainName: hostZoneName,
+    })
+
+    /**
+     * ACMからSSL証明書を獲得する
+     * 
+     * ### 参考にさせていただいた記事等
+     * * [API Gatewayにカスタムドメインを設定するためのリソースを全てAWS CDKでつくってみた | DevelopersIO](https://dev.classmethod.jp/articles/aws-cdk-all-resources-for-api-gateway/)
+     * 
+     */
+    const certificate: acm.Certificate = new acm.DnsValidatedCertificate(this, "cdkapp01_apicert", {
+      domainName: `cdk01api01.${zone.zoneName}`,
+      hostedZone: zone,
+      validation: acm.CertificateValidation.fromDns(zone)
+    });
+
+    /**
+     * API Gatewayにカスタムドメインを設定する。
+     * 参考：https://qiita.com/ishizakit/items/15bff195205ee19f0294
+     */
+    cdkApp01Api01.addDomainName("cdk01api01domain", {
+      domainName: `cdk01api01.${zone.zoneName}`,
+      certificate: certificate,
+      endpointType: api.EndpointType.REGIONAL
+    })
+
+    /** サブドメインの定義 */
+    new route53.ARecord(this, "CdkApp01SubDomain", {
+      zone: zone,
+      target: route53.RecordTarget.fromAlias(new route53Targets.ApiGateway(cdkApp01Api01)),
+      recordName: `cdk01api01.${zone.zoneName}`,
+    });
+
   }
 }
