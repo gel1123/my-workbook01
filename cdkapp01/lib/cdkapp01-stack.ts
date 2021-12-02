@@ -65,7 +65,8 @@ import * as route53Targets from "@aws-cdk/aws-route53-targets";
  * 
  * #### 別スタックで、だけど後日やってみたいこと
  * * EC2スポットインスタンスを活用するためのCDKスタック作成
- * 
+ * * Fargateの活用
+ * * AWS Lambda + Spring
  */
 export class Cdkapp01Stack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
@@ -164,7 +165,10 @@ export class Cdkapp01Stack extends cdk.Stack {
       proxy: false,
       endpointTypes: [
         api.EndpointType.REGIONAL
-      ]
+      ],
+      deployOptions: {
+        stageName: "dev"
+      }
     });
 
     /**
@@ -366,11 +370,26 @@ export class Cdkapp01Stack extends cdk.Stack {
      * API Gatewayにカスタムドメインを設定する。
      * 参考：https://qiita.com/ishizakit/items/15bff195205ee19f0294
      */
-    cdkApp01Api01.addDomainName("cdk01api01domain", {
+    const apiDomainName: api.DomainName = cdkApp01Api01.addDomainName("cdk01api01domain", {
       domainName: `cdk01api01.${zone.zoneName}`,
       certificate: certificate,
       endpointType: api.EndpointType.REGIONAL
-    })
+    });
+
+    /**
+     * hogehoge.com/d に対して、ステージを紐づけている.
+     * 第二引数のオプションでstageプロパティを指定しない場合、
+     * ベースパス（上記のd）は自動的に、第一引数のAPIの
+     * deploymentStageに紐づけられる。
+     * 
+     * なお、まだ仕様について確認できていないが、
+     * どうやらベースパスマッピングを行ったからといって、
+     * ベースパスなしのURLでアクセスできなくなるわけではない模様。
+     * その場合に紐づけられているステージはどこだ...?
+     */
+    apiDomainName.addBasePathMapping(cdkApp01Api01, {
+      basePath: "d"
+    });
 
     /** サブドメインの定義 */
     new route53.ARecord(this, "CdkApp01SubDomain", {

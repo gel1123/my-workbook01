@@ -105,18 +105,31 @@ export async function writeHandler(req: proxyReq)
     /** 例：2021-11-26-8-45 */
     const datestr = `${d.YYYY}-${d.M}-${d.D}-${d.H}-${d.m}`;
 
+    // 要求本文の抽出
+    interface IBody {
+        user_id?: string;
+        fullpath?: string;
+        category?: string;
+        tags?: string[];
+        body?: string;
+        user_name?: string;
+        references?: string[];
+        [key: string]: any;
+    }
+    const body: IBody = JSON.parse(req.body);
+
     const newItem: PutItemInputAttributeMap = {
-        user_id: { S: "0" }, // PK
-        fullpath: { S: "/sample-dir/sample-title" }, // SK
-        category: { S: "sample-category" },
-        tags: { SS: ["sample-tag1", "sample-tag2", "sample-tag3"] },
-        body: { S: `このメモは ${datestrJa} に作成されました。引数には次の値が指定されています：${JSON.stringify(req)}` },
-        user_name: { S: "sample-user" },
+        user_id: { S: body.user_id ?? "0" }, // PK ※ちなみにTypeScript3.7以降で登場した「??」演算子は、undefineとnull限定版のOR演算子（||)
+        fullpath: { S: body.fullpath ?? "/sample-dir/sample-title" }, // SK
+        category: { S: body.category ?? "sample-category" },
+        tags: { SS: body.tags ?? ["sample-tag1", "sample-tag2", "sample-tag3"] },
+        body: { S: body.body ?? `このメモは ${datestrJa} に作成されました。引数には次の値が指定されています：${JSON.stringify(req)}` },
+        user_name: { S: body.user_name ?? "sample-user" },
         lastUpdated: { S: datestr },
         lastAccess: { S: datestr },
         created: { S: datestr },
         references: {
-            SS: [
+            SS: body.references ?? [
                 "https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/best-practices.html",
                 "https://aws.amazon.com/jp/blogs/news/operating-lambda-design-principles-in-event-driven-architectures-part-2/",
                 "https://docs.aws.amazon.com/ja_jp/apigateway/latest/developerguide/welcome.html",
