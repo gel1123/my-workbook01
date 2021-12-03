@@ -167,7 +167,8 @@ export class Cdkapp01Stack extends cdk.Stack {
         api.EndpointType.REGIONAL
       ],
       deployOptions: {
-        stageName: "dev"
+        // Stage name only allows a-zA-Z0-9_
+        stageName: "v0"
       }
     });
 
@@ -369,6 +370,13 @@ export class Cdkapp01Stack extends cdk.Stack {
     /**
      * API Gatewayにカスタムドメインを設定する。
      * 参考：https://qiita.com/ishizakit/items/15bff195205ee19f0294
+     * 
+     * なおドメイン名は、ACM証明書の範囲内である必要がある。
+     * そうでないドメイン名を指定した場合には、たとえばAWSコンソール上であれば、次のようなエラーが出る。
+     * 
+     * ```
+     * The domain name to be created is not covered by the provided certificate.
+     * ```
      */
     const apiDomainName: api.DomainName = cdkApp01Api01.addDomainName("cdk01api01domain", {
       domainName: `cdk01api01.${zone.zoneName}`,
@@ -386,9 +394,30 @@ export class Cdkapp01Stack extends cdk.Stack {
      * どうやらベースパスマッピングを行ったからといって、
      * ベースパスなしのURLでアクセスできなくなるわけではない模様。
      * その場合に紐づけられているステージはどこだ...?
+     * 
+     * ### 補足
+     * CDKはどうやら下記のいずれかの操作により、デフォルトでベースパスのルート「/」を追加してしまうらしい。
+     * * REST API に domainName を設定する
+     * * addDomainName() をコールする
+     * 
+     * わざわざ目的もなくこのような仕様にしているわけではないはず。
+     * 考えてみたら、次の事情により、このような仕様とすべきとされているのではないかと思いついた。
+     * 
+     * * カスタムドメイン名を作成した時点で、そのドメイン名には、なにかしらのAPIマッピングが必要
+     * * addDomainName() による「ドメイン名の追加」であっても、追加元であるデフォルトルートに、なにかしらのマップが必要
+     * * 「デフォルトルートになにも割り当ない」ようにしたいなら、そもそもそれは「デフォルトルート」と呼べない。
+     * * 上記なら、そもそもカスタムドメイン名を複数用意すべきでは?
+     * 
+     * 参考：[stack overflow](https://stackoverflow.com/questions/66244012/aws-api-gateway-default-base-mappings-with-cdk)
+     * 
+     * ### 覚書
+     * ステージ複数定義して色々やりたいときには、いくつか考慮すべきことがある模様。
+     * 参考までに、それらについて言及している記事をここにメモする
+     * * https://stackoverflow.com/questions/62449187/deploy-multiple-api-gateway-stages-with-aws-cdk
+     * * https://qiita.com/nomi3/items/d1569049459440470fab
      */
     apiDomainName.addBasePathMapping(cdkApp01Api01, {
-      basePath: "d"
+      basePath: "v0"
     });
 
     /** サブドメインの定義 */

@@ -7,7 +7,7 @@ import { Cdkapp01Stack } from '../lib/cdkapp01-stack';
  * デプロイ実行時には、次のようなｺﾏﾝﾄﾞを打つことを想定して実装している。
  * 
  * ```
- * cdk deploy --profile studying --context hostZoneName=hogehoge.com
+ * npm run build && cdk deploy --profile studying --context hostZoneName=hogehoge.com
  * ```
  */
 const app = new cdk.App();
