@@ -1,5 +1,10 @@
 package com.example.batchprocessing;
 
+/**
+ * プロジェクト名：gs-batch-processing-complete
+ * <hr>
+ *
+ */
 public class Person {
 
 	private String lastName;

@@ -9,6 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+/**
+ * プロジェクト名：gs-batch-processing-complete
+ * <hr>
+ *
+ */
 @Component
 public class JobCompletionNotificationListener extends JobExecutionListenerSupport {
 

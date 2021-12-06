@@ -24,6 +24,11 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 // tag::setup[]
+/**
+ * プロジェクト名：gs-batch-processing-complete
+ * <hr>
+ *
+ */
 @Configuration
 @EnableBatchProcessing
 public class BatchConfiguration {

@@ -3,6 +3,11 @@ package com.example.batchprocessing;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/**
+ * プロジェクト名：gs-batch-processing-complete
+ * <hr>
+ *
+ */
 @SpringBootApplication
 public class BatchProcessingApplication {
 
