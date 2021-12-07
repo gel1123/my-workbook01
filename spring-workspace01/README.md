@@ -10,6 +10,9 @@ STSからインポートできるSpring Batchの入門コンテンツをもと�
 なお並行して「Spring徹底入門 Spring FrameworkによるJavaアプリケーション開発 | 株式会社NTTデータ」を読みはじめているようです。
 
 ## Spring Batchについて色々メモ
+
+### Spring Batch のざっくりとしたイメージ
+
 日本語版の公式ドキュメントは [こちら](https://spring.pleiades.io/spring-batch/docs/current/reference/html/)。
 
 筆者はまともにバッチ処理の設計を行ったことがないが、
@@ -38,3 +41,6 @@ STSからインポートできるSpring Batchの入門コンテンツをもと�
 という感じ。AWS Step Functions の場合は、JobRepository的なものを意識することがないが、
 実際にはステートマシン（状態遷移図／ワークフロー）が、見えないところでプロセスのメタデータを管理してくれている。
 
+### Spring Batch ってどう使うの？（入門コンテンツベースで探ってみる）
+
+探り中...
