@@ -1,7 +1,7 @@
 package com.example.batchprocessing;
 
 /**
- * プロジェクト名：gs-batch-processing-complete
+ * プロジェクト名：gs-batch-processing-complete（完成版サンプル）
  * <hr>
  *
  */

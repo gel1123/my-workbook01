@@ -10,7 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 /**
- * プロジェクト名：gs-batch-processing-complete
+ * プロジェクト名：gs-batch-processing-complete（完成版サンプル）
  * <hr>
  *
  */

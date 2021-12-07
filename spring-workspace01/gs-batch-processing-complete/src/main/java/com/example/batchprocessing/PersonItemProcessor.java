@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
 
 /**
- * プロジェクト名：gs-batch-processing-complete
+ * プロジェクト名：gs-batch-processing-complete（完成版サンプル）
  * <hr>
  *
  */
