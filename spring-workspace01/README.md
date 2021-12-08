@@ -44,3 +44,30 @@ STSからインポートできるSpring Batchの入門コンテンツをもと�
 ### Spring Batch ってどう使うの？（入門コンテンツベースで探ってみる）
 
 探り中...
+
+STSでインポートできる Spring Batch の入門コンテンツ（の完成版）では、次のファイルが用意されている。
+
+* BatchProcessingApplication.java
+  * アプリケーションコンテキスト。
+  * @SpringBootApplication が内包する機能により、パッケージ内のBeanをDI登録したりする。
+* BatchConfiguration.java
+  * Bean定義。
+  * @EnableBatchProcessing でなんかしてそうだけどまだ調べられていない。
+* JobCompletionNotificationListener.java
+  * JobExecutionListenerSupportを継承
+  * afterJobを @Override して、Job実行後の処理をなんかしてるっぽいけどまだ調べられていない
+* Person.java
+  * 「姓」と「名」が用意されているエンティティ
+* PersonItemProcessor.java
+  * ItemProcessorを継承していることから、Stepの加工処理を担っているのだと想定
+  * あれ？ ItemReaderとItemWriteはどこ？
+* sample-data.csv
+  * ItemReaderがあるならそこで読み取ってそうだけど...
+* schema-all.sql
+  * Personエンティティに対応するテーブル作ってるみたい。
+  * どこでこれ実行してる？
+  * そもそもDBとの接続ってどこ？
+
+
+
+
