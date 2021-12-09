@@ -43,31 +43,38 @@ STSからインポートできるSpring Batchの入門コンテンツをもと�
 
 ### Spring Batch ってどう使うの？（入門コンテンツベースで探ってみる）
 
-探り中...
-
 STSでインポートできる Spring Batch の入門コンテンツ（の完成版）では、次のファイルが用意されている。
 
 * BatchProcessingApplication.java
   * アプリケーションコンテキスト。
   * @SpringBootApplication が内包する機能により、パッケージ内のBeanをDI登録したりする。
+  * なお起動時に SptingBoot の便利機能によって、データソースが自動で登録されたり、schema-@@platform@@.sql が自動実行されたりする。
 * BatchConfiguration.java
   * Bean定義。
-  * @EnableBatchProcessing でなんかしてそうだけどまだ調べられていない。
+  * @EnableBatchProcessing で JobRepository, JobBuilderFactory, StepBuilderFactory など Spring Batch に必要なBeanを予め取り込んでいる。  
+  * 上記を用いながら、JobやStepのBean定義を行っている。
+  * さらに JobLancherなど Spring Batch の根幹となる機能も、同じく @EnableBatchProcessing に内包されている。
 * JobCompletionNotificationListener.java
-  * JobExecutionListenerSupportを継承
-  * afterJobを @Override して、Job実行後の処理をなんかしてるっぽいけどまだ調べられていない
+  * JobExecutionListener実装クラスであり、ジョブの前後に実行したい処理を挿入できる。
+  * ここでは afterJob だけ定義されており、beforeJobは継承したJobExecutionListenerSupportに従い処理なしとなっている。
 * Person.java
   * 「姓」と「名」が用意されているエンティティ
 * PersonItemProcessor.java
-  * ItemProcessorを継承していることから、Stepの加工処理を担っているのだと想定
-  * あれ？ ItemReaderとItemWriteはどこ？
+  * 「入力」「加工」「出力」を担うStepの機能のうち、「加工」フローの実装。
+  * BatchConfigurationで、ItemProcessorのBean定義時に使用されている。
 * sample-data.csv
-  * ItemReaderがあるならそこで読み取ってそうだけど...
+  * BatchConfigurationで定義したItemReaderが読み取っている
 * schema-all.sql
-  * Personエンティティに対応するテーブル作ってるみたい。
-  * どこでこれ実行してる？
-  * そもそもDBとの接続ってどこ？
+  * Personエンティティに対応するテーブル作っている。
+  * [ドキュメント](https://spring.pleiades.io/guides/gs/batch-processing/)によると、Spring Boot は、起動時に schema-@@platform@@.sql を自動的に実行する模様。-all はすべてのプラットフォームのデフォルトであるため、毎回必ず実行される。
 
+上記の入門コンテンツのファイル構成をもとに、「基本的な使い方」としてざっくりまとめるなら、下記のようになる。
 
-
-
+1. まずアプリケーションコンテキストを定義する
+2. 次にバッチ処理に必要な下記コンポーネントを、Bean定義する  
+  a. Job  
+  b. Step（ItemReader, ItemProcessor, ItemWriterを内包）  
+  c. 必要ならListenerも
+3. 入出力する情報の構造を示すクラスを定義
+4. 入力データを用意
+5. もしDBに情報を出力したいなら（そして SpringBootアプリケーションとして実行するなら）テーブル定義となる schema-@@platform@@.sql を用意
