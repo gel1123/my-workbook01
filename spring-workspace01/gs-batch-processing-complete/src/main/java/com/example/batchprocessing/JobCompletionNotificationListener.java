@@ -12,7 +12,8 @@ import org.springframework.stereotype.Component;
 /**
  * プロジェクト名：gs-batch-processing-complete（完成版サンプル）
  * <hr>
- *
+ * ジョブにこのリスナーを渡すことで、
+ * ジョブ実行前や実行後に、オーバーライドしたコールバック処理をトリガーできる。
  */
 @Component
 public class JobCompletionNotificationListener extends JobExecutionListenerSupport {

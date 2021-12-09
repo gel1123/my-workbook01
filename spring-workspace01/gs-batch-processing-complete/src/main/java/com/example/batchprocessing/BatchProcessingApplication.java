@@ -14,6 +14,10 @@ import org.springframework.context.annotation.ComponentScan;
  * アプリケーションコンテキストをmain()で取得している。 なおアプリケーションコンテキストはDIコンテナの役割を担っている。
  * コンテナには、ConfigurationによってBeanと呼ばれるコンポーネントが登録されるようになっているが、
  * SpringBootApplicationでは、Configurationの明示的な指定がなくても いい感じに動くようになっている。
+ * <hr>
+ * <h3>参考</h3>
+ * Spring Batchの日本語公式ドキュメントは次リンク：
+ * https://spring.pleiades.io/spring-batch/docs/current/reference/html/
  */
 @SpringBootApplication
 public class BatchProcessingApplication {
