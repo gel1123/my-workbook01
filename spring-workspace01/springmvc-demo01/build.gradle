@@ -1,0 +1,64 @@
+/**
+ * 参考記事：
+ * https://qiita.com/_daisuke0802/items/f314709b3baa0e0f65b5
+ * https://shinsuke789.hatenablog.jp/entry/2019/12/28/115317
+ */
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'eclipse-wtp'
+apply plugin: 'idea'
+apply plugin: 'war'
+
+
+sourceCompatibility = 1.11
+targetCompatibility = 1.11
+
+// リポジトリの設定
+repositories {
+	mavenCentral()
+}
+
+// 依存関係の設定
+dependencies {
+	// ---- 短縮記法は「groupId:artifactId:version」----
+	
+	// compile 'hogehoge:hogehoge:hogehoge' 形式は最新のGradleでは対応していない。
+	// 現在は「compile」ではなく「implementation」が正しい。
+	// 参考：https://stackoverflow.com/questions/23796404/could-not-find-method-compile-for-arguments-gradle
+
+	// https://mvnrepository.com/artifact/javax.servlet.jsp.jstl/javax.servlet.jsp.jstl-api
+	implementation 'javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.2'
+	// https://mvnrepository.com/artifact/javax.servlet/jsp-api
+	compileOnly 'javax.servlet:jsp-api:2.0'
+	
+	// https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api
+	compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
+	// https://mvnrepository.com/artifact/org.springframework/spring-context
+	implementation 'org.springframework:spring-context:5.2.18.RELEASE'
+	// https://mvnrepository.com/artifact/org.springframework/spring-webmvc
+	implementation 'org.springframework:spring-webmvc:5.2.18.RELEASE'
+}
+
+// ビルドするwarファイルの名前の設定
+war {
+	archiveName = 'sig.war'
+}
+
+eclipse.project {
+	buildCommand 'org.springframework.ide.eclipse.core.springbuilder'
+	//natures 'org.eclipse.buildship.core.gradleprojectnature'
+	natures 'org.springsource.ide.eclipse.gradle.core.nature'
+}
+eclipse.classpath {
+	defaultOutputDir = file('bin/build/classes')
+}
+
+tasks.eclipse.doFirst {
+    File prefs = file(".settings/org.eclipse.buildship.core.prefs")
+    if(!prefs.exists()){
+        prefs.append('''
+            connection.project.dir=
+            eclipse.preferences.version=1
+            '''.stripIndent())
+    }
+}
