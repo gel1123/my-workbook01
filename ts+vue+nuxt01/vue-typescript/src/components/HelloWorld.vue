@@ -1,6 +1,6 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
+    <h1>{{ computedMsg }}</h1>
     <p>
       For a guide and recipes on how to configure / customize this project,<br>
       check out the
@@ -30,12 +30,56 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, Prop, PropType } from 'vue';
 
 export default defineComponent({
   name: 'HelloWorld',
+  /**
+   * Vueコンポーネントのpropsは、
+   * 直接型定義するのではなく、定義したい型のネイティブコンストラクタ
+   * を使って型の定義を行う。
+   * こうすることでコンポーネント内部で推論が効くようになる。
+   */
   props: {
-    msg: String,
+    /** 必須でないならこう書く */
+    msg: String, // 複数の型を
+    /** 必須ならこう書く */
+    requiredMsg: {
+      type: String,
+      required: true
+    },
+    /** number | string 型の変数ならこう書く */
+    numOrStr: [String, Number],
+    /**
+     * Objectはネイティブコンストラクタでは情報不足。
+     * なので、PropType<T>型をインポートして、[型アサーション](https://typescript-jp.gitbook.io/deep-dive/type-system/type-assertion)
+     * と generics で補足する。
+     * 
+     * ただしこの方法は親から得た値が型誤りであってもコンパイルエラーを得られない。
+     * これを解決するには...（TODO：学習後追記）
+     */
+    obj: {
+      type: Object as PropType<{ name: string }>,
+      required: true
+    },
+    /**
+     * Arrayもネイティブコンストラクタでは情報が不足するので、PropType<T>[] で補足。
+     * Objectと同じ課題を抱えていることに注意。
+     */
+    arr: {
+      type: Array as PropType<{ member: string }[]>,
+      required: true
+    }
+  },
+  computed: {
+    computedMsg(): string {
+      // 余談： ?? は Null結合演算子 (Nullish Coalescing Operator)
+      return `${this.msg ?? "none"}
+       | ${this.requiredMsg}
+       | ${this.numOrStr ?? "none"}
+       | ${this.obj?.name ?? "none"}
+       | ${this.arr?.reduce((e1,e2) => ({member: e1.member+"_"+e2.member})).member ?? "none"}`
+    }
   },
 });
 </script>
