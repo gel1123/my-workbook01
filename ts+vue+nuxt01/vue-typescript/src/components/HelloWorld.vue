@@ -32,8 +32,23 @@
 <script lang="ts">
 import { defineComponent, Prop, PropType } from 'vue';
 
+interface Data {
+  d3: string
+}
+
 export default defineComponent({
   name: 'HelloWorld',
+  /**
+   * data() は次のみっつの方法で型を付与する
+   *  1. 初期値による型推論に頼る
+   *  2. 型アサーションを用いる（asキーワード）
+   *  3. type or interface を定義して、型アノテーション（型注釈）で付与する
+   */
+  data():Data {
+    return {
+      d3: "data3",
+    }
+  },
   /**
    * Vueコンポーネントのpropsは、
    * 直接型定義するのではなく、定義したい型のネイティブコンストラクタ
@@ -78,7 +93,8 @@ export default defineComponent({
        | ${this.requiredMsg}
        | ${this.numOrStr ?? "none"}
        | ${this.obj?.name ?? "none"}
-       | ${this.arr?.reduce((e1,e2) => ({member: e1.member+"_"+e2.member})).member ?? "none"}`
+       | ${this.arr?.reduce((e1,e2) => ({member: e1.member+"_"+e2.member})).member ?? "none"}
+       | ${this.d3}`
     }
   },
 });
