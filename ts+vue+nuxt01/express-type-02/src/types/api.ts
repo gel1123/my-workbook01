@@ -1,3 +1,4 @@
 export interface IResBody {
-    message: string
+    message: string;
+    count: number;
 }
