@@ -29,10 +29,12 @@ export default (app: Express.Application) => {
         }
         next(createError(401))
     })
-    app.get('/ping', (req, res, next) => {
+    app.get('/ping(/:option|)', (req, res, next) => {
         if (req.session && req.session.count !== undefined) {
             req.session.count++
-            const data: IResBody = { message: "pong", count: req.session.count }
+            const data: IResBody = { message: "pong" + (
+                req.params.option ? ` [${req.params.option}]` : ""
+            ), count: req.session.count }
             res.send(data)
             return
         }
