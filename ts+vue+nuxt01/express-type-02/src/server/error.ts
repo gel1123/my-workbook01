@@ -3,6 +3,7 @@ import createError, { HttpError } from 'http-errors'
 
 export default (app: Express.Application) => {
     app.use((req, res, next) => {
+        console.log("checkpoint4")
         res.render('404.ejs')
         next(createError(404))
     })
@@ -12,6 +13,7 @@ export default (app: Express.Application) => {
         res: Express.Response,
         next: Express.NextFunction
     ) => {
+        console.log("checkpoint5")
         console.log(err.statusCode)
     })
 }

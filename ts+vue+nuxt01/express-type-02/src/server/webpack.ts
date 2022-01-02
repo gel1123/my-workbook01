@@ -13,7 +13,7 @@ export default (app: Express.Application) => {
     if (process.env.NODE_ENV !== 'production') {
         app.use(hotMiddleware(compiler))
         app.use(devMiddleware(compiler, {
-            noInfo: true, // ビルドに関するログ出力を抑制
+            // noInfo: true, // ビルドに関するログ出力を抑制 <=過去時点では存在したオプションだが、現在（"webpack-dev-middleware"： "5.3.0"）は存在しない
             publicPath: config.output.publicPath // バンドルされたファイルの配置先
         }))
     }

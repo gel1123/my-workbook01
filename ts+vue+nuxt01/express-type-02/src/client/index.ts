@@ -10,7 +10,7 @@ button!.addEventListener('click', () => {
         // dataはサーバ側のレスポンスボディだが、とくになにもしないとany型とみなされる
         // だが、上記のようにHTTPメソッドに型定義を注入してやれば、
         // dataの型をサポートすることができる
-        console.log(data.message)
+        console.log(data)
     })
 })
 
