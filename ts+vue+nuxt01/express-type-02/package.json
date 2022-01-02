@@ -1,0 +1,33 @@
+{
+  "scripts": {
+    "serve": "ts-node-dev src/server/index.ts",
+    "redis": "ts-node-dev src/redis/index.ts"
+  },
+  "dependencies": {
+    "axios": "latest",
+    "body-parser": "latest",
+    "connect-redis": "latest",
+    "cookie-parser": "latest",
+    "ejs": "latest",
+    "express": "latest",
+    "express-session": "latest",
+    "http-errors": "latest",
+    "redis-server": "latest",
+    "ioredis": "latest"
+  },
+  "devDependencies": {
+    "@types/axios": "latest",
+    "@types/connect-redis": "latest",
+    "@types/cookie-parser": "latest",
+    "@types/express": "latest",
+    "@types/express-session": "latest",
+    "@types/http-errors": "latest",
+    "@types/webpack-env": "latest",
+    "ts-loader": "latest",
+    "ts-node-dev": "latest",
+    "typescript": "latest",
+    "webpack": "latest",
+    "webpack-dev-middleware": "latest",
+    "webpack-hot-middleware": "latest"
+  }
+}
