@@ -29,7 +29,15 @@ export default (app: Express.Application) => {
         }
         next(createError(401))
     })
-    app.get('/ping(/:option|)', (req, res, next) => {
+
+    interface IParams {
+        option? : string
+    }
+    app.get('/ping(/:option|)', (
+        req: Express.Request<IParams>, //Express4.17.2にてgenericsによる型定義が可能に
+        res,
+        next
+    ) => {
         if (req.session && req.session.count !== undefined) {
             req.session.count++
             const data: IResBody = { message: "pong" + (
