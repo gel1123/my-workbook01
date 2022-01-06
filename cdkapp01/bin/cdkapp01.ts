@@ -9,6 +9,19 @@ import { Cdkapp01Stack } from '../lib/cdkapp01-stack';
  * ```
  * npm run build && cdk deploy --profile studying --context hostZoneName=hogehoge.com
  * ```
+ * 
+ * もし久し振りにCDKを動かそうとしたとき、次のようなエラーが出る場合には、
+ * 一度 `npm install aws-cdk@latest` などでAWS-CDKのバージョンをアップさせるとよい。
+ * 
+ * ```
+ * This CDK CLI is not compatible with the CDK library used by your application. Please upgrade the CLI to the latest version.
+ * (Cloud assembly schema version mismatch: Maximum schema version supported is 14.0.0, but found 15.0.0)
+ * ```
+ * 
+ * そのほかにもAWS-CDKまわりはバージョンによって色々面倒な事態が発生するケースもあるので、
+ * グローバルインストールではなく、ローカルインストールで `npx cdk deploy` のようにcdkｺﾏﾝﾄﾞを使うのが良いという意見もあることを
+ * 覚えておくと、今後役立つかも...
+ * 
  */
 const app = new cdk.App();
 new Cdkapp01Stack(app, 'Cdkapp01Stack', {
