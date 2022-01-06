@@ -1,3 +1,10 @@
+### Lambdaデプロイの補足
+[公式サイトの記事](https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/nodejs-package.html)によると、下記の仕様になっている模様。
+
+```
+関数が AWS SDK for JavaScript 以外のライブラリに依存している場合は、npm を使用してそれらのライブラリをデプロイパッケージに含めます。ローカル環境の Node.js バージョンが関数の Node.js バージョンと一致していることを確認します。いずれかのライブラリでネイティブコードを使用している場合は、Amazon Linux 環境を使用してデプロイパッケージを作成します。
+```
+
 ### Dynamo設計検討メモ
 欲しい可能性が微弱にでも存在するカラムは...
 
