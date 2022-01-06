@@ -1,0 +1,9 @@
+
+@font-face {
+  font-family: noto;
+  src: url(/assets/fonts/NotoSansJP-Thin.otf);
+}
+body {
+  margin:0;
+  font-family: noto;
+}
