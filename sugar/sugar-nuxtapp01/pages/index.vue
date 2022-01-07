@@ -1,9 +1,8 @@
 <script lang="ts" setup>
 import Favicons from '~~/components/favicons.vue';
 import Logo from '~~/components/simple-logo.vue';
-import { onMounted } from 'vue';
 
-const title = "Drip Cafe";
+// <==================== 型情報 ====================>
 interface RssItem {
   pubDate: string;
   title: string;
@@ -13,50 +12,77 @@ interface RssItem {
   summary: string;
   link: string;
 }
-/** 
- * script setupでは data にアクセスできない（コンポーネント作成前の「セットアップ」としての仕組みだから）。
- * 代わりに ref や reactive を用いてテンプレートとの動的な連携を行う。
- * refはプリミティブな値に、reactiveはオブジェクトに適用する。
- * [参考にさせていただいた記事](https://edge-labo.com/vue3-composition-api/)
-*/
-let rssItems: RssItem[] = reactive([]);
+// </==================== 型情報 ====================>
 
-// mounted hook
-onMounted(async () => {
-  // CORSの壁を突破するために、下記の参考記事のように仲介役を挟む必要がある（SSGのためサーバ側でやらない。未実装）
-  // 参考：https://www.to-r.net/media/note-rss/
-  
-  // https://dripcafe.ti-da.net/index.xml
-  var $config = useRuntimeConfig();
-  const endpoint: string = $config.rssEndpoint;
-  const res = await fetch(endpoint);
-  if (!res.ok) return;
-  const xml = await res.text();
+// <==================== 定数 ====================>
+const title = "Drip Cafe";
+// </==================== 定数 ====================>
+
+// <==================== 関数 ====================>
+/** RSSのItemタグ内から必要な情報を収集して返却する */
+const getItem = ($item: Element | null) => {
+  if (!$item) return null;
+  const item: RssItem = {
+    pubDate: $item.querySelector("pubDate")!.textContent!,
+    title: $item.querySelector("title")!.textContent!,
+    enclosure: {
+      url: $item.querySelector("enclosure")!.getAttribute("url")!
+    },
+    summary: $item.querySelector("description")!.textContent!,
+    link: $item.querySelector("link")!.textContent!
+  };
+  return item;
+}
+/**
+ * RSS(XML) をもとに、初期表示に必要な情報を収集してセットする.
+ * なおDOMParserはブラウザ固有なので、この関数はフロントで実行させるべき。
+ */
+const setRssItems = (xml: string | undefined | null) => {
+  if (!xml) return;
   const parser = new DOMParser();
   const parsed = parser.parseFromString(xml, "application/xml");
   const $item1 = parsed.querySelector("item");
   const $item2 = parsed.querySelector("item+item");
   const $item3 = parsed.querySelector("item+item+item");
-  const getItem = ($item: Element | null) => {
-    if (!$item) return null;
-    const item: RssItem = {
-      pubDate: $item.querySelector("pubDate")!.textContent!,
-      title: $item.querySelector("title")!.textContent!,
-      enclosure: {
-        url: $item.querySelector("enclosure")!.getAttribute("url")!
-      },
-      summary: $item.querySelector("description")!.textContent!,
-      link: $item.querySelector("link")!.textContent!
-    };
-    return item;
-  };
   const item1: RssItem | null = getItem($item1);
   const item2: RssItem | null = getItem($item2);
   const item3: RssItem | null = getItem($item3);
   item1 && rssItems.push(item1);
   item2 && rssItems.push(item2);
   item3 && rssItems.push(item3);
+}
+// </==================== 関数 ====================>
+
+// <==================== ref || reactive ====================>
+/** 画面に出力するために抽出したRSS情報 */
+const rssItems: RssItem[] = reactive([]);
+/** RSS本体のXML */
+let xml  = ref("");
+// </==================== ref || reactive ====================>
+
+// <==================== 手続き処理 ====================>
+  // ----------------- ここからSSR用 ---------------
+const { data } = await useFetch('https://dripcafe.ti-da.net/index.xml');
+xml.value = (data.value ? data.value : "") as string;
+  // ----------------- ここまでSSR用 ---------------
+  // ----------------- ここからSSG用 ---------------
+  // SSGでCORSの壁を突破したいなら、下記のように仲介役を挟む必要がある
+  // 参考：https://www.to-r.net/media/note-rss/
+  // var $config = useRuntimeConfig();
+  // const endpoint: string = $config.rssEndpoint; //<= https://dripcafe.ti-da.net/index.xml からRSS取得
+  // const res = await fetch(endpoint);
+  // if (res.ok) {
+  //   xml.value = await res.text();
+  // }
+  // ----------------- ここまでSSG用 ---------------
+// </==================== 手続き処理 ====================>
+
+// <==================== hook ====================>
+onMounted(async () => {
+  setRssItems(xml.value);
 });
+// </==================== hook ====================>
+
 </script>
 <template>
   <Favicons/>
