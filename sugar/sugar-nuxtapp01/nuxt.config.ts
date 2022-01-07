@@ -14,5 +14,8 @@ export default defineNuxtConfig({
     typescript: {
         strict: true
     },
-    css: ['~/assets/css/style.css']
+    css: ['~/assets/css/style.css'],
+    publicRuntimeConfig: {
+        rssEndpoint: process.env.RSS_ENDPOINT
+    }
 })

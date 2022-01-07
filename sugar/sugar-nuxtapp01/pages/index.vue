@@ -2,6 +2,7 @@
 import Favicons from '~~/components/favicons.vue';
 import Logo from '~~/components/simple-logo.vue';
 import { onMounted } from 'vue';
+
 const title = "Drip Cafe";
 interface RssItem {
   pubDate: string;
@@ -12,26 +13,34 @@ interface RssItem {
   summary: string;
   link: string;
 }
-const rssItems: RssItem[] = [];
+/** 
+ * script setupでは data にアクセスできない（コンポーネント作成前の「セットアップ」としての仕組みだから）。
+ * 代わりに ref や reactive を用いてテンプレートとの動的な連携を行う。
+ * refはプリミティブな値に、reactiveはオブジェクトに適用する。
+ * [参考にさせていただいた記事](https://edge-labo.com/vue3-composition-api/)
+*/
+let rssItems: RssItem[] = reactive([]);
 
 // mounted hook
 onMounted(async () => {
   // CORSの壁を突破するために、下記の参考記事のように仲介役を挟む必要がある（SSGのためサーバ側でやらない。未実装）
   // 参考：https://www.to-r.net/media/note-rss/
-  const res = await fetch('https://dripcafe.ti-da.net/index.xml', {mode: "cors"});
+  
+  // https://dripcafe.ti-da.net/index.xml
+  var $config = useRuntimeConfig();
+  const endpoint: string = $config.rssEndpoint;
+  const res = await fetch(endpoint);
   if (!res.ok) return;
   const xml = await res.text();
   const parser = new DOMParser();
-  const parsed = parser.parseFromString(xml, "text/xml");
-  parsed.querySelector
-  console.log("parsed", parsed);
+  const parsed = parser.parseFromString(xml, "application/xml");
   const $item1 = parsed.querySelector("item");
   const $item2 = parsed.querySelector("item+item");
   const $item3 = parsed.querySelector("item+item+item");
   const getItem = ($item: Element | null) => {
     if (!$item) return null;
     const item: RssItem = {
-      pubDate: $item.querySelector("pubData")!.textContent!,
+      pubDate: $item.querySelector("pubDate")!.textContent!,
       title: $item.querySelector("title")!.textContent!,
       enclosure: {
         url: $item.querySelector("enclosure")!.getAttribute("url")!
@@ -111,12 +120,14 @@ onMounted(async () => {
       <div class="blog body bottom">
         <h2 class="blog__heading">{{title}}'s Blog</h2>
         <div class="blog__body">
-          <div v-for="item in rssItems">
-            <p>{{item.pubDate}}</p>
-            <p>{{item.title}}</p>
-            <img :src="item.enclosure?.url" />
-            <p>{{item.summary}}</p>
-            <p>{{item.link}}</p>
+          <div v-for="item in rssItems" :v-key="item.link">
+            <div>
+              <p>{{item.pubDate}}</p>
+              <p>{{item.title}}</p>
+              <img :src="item.enclosure?.url" />
+              <p>{{item.summary}}</p>
+              <p>{{item.link}}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -172,11 +183,8 @@ onMounted(async () => {
   margin: 4px auto;
 }
 .menu__body, .story__body, .blog__body {
-  height: 200px;
-  width: 90%;
-  line-height: 200px;
-  text-align: center;
   border: 1px solid rgb(200, 200, 200);
+  padding: 16px;
 }
 .text--minimum {
   font-size: xx-small;
