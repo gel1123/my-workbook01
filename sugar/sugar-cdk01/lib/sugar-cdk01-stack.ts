@@ -1,4 +1,4 @@
-import { Stack, StackProps } from 'aws-cdk-lib';
+import { Duration, Stack, StackProps } from 'aws-cdk-lib';
 import { EndpointType, LambdaIntegration, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
@@ -27,7 +27,12 @@ export class SugarCdk01Stack extends Stack {
       handler: lambda,
       proxy: true, // API自体をプロキシ統合にすると、addResourceでパスごとの処理を定義できない
       endpointTypes: [EndpointType.REGIONAL],
-      deployOptions: { stageName: "v0" } // Stage name only allows a-zA-Z0-9_
+      deployOptions: {
+        stageName: "v0", // Stage name only allows a-zA-Z0-9_
+        // cachingEnabled: true, // キャッシュ有効にするならこのようにする（今はキャッシュ使うほどのアクセス数がない見込み）
+        // cacheClusterEnabled: true,
+        // cacheTtl: Duration.hours(1)
+      } 
     });
 
     // 上記を proxy: false で運用するなら、次のように addResource で特定の処理を定義できる。
