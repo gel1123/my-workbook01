@@ -22,13 +22,14 @@ const title = "Drip Cafe";
 /** RSSのItemタグ内から必要な情報を収集して返却する */
 const getItem = ($item: Element | null) => {
   if (!$item) return null;
+  const date = new Date($item.querySelector("pubDate")!.textContent!);
   const item: RssItem = {
-    pubDate: $item.querySelector("pubDate")!.textContent!,
+    pubDate: `${date.getMonth()-0+1}/${date.getDate()} ${date.getHours()}:${date.getMinutes()}`,
     title: $item.querySelector("title")!.textContent!,
     enclosure: {
-      url: $item.querySelector("enclosure")!.getAttribute("url")!
+      url: $item.querySelector("enclosure")?.getAttribute("url") || ""
     },
-    summary: $item.querySelector("description")!.textContent!,
+    summary: `${$item.querySelector("description")!.textContent!.slice(0, 50)}......`,
     link: $item.querySelector("link")!.textContent!
   };
   return item;
@@ -147,12 +148,19 @@ onMounted(async () => {
         <h2 class="blog__heading">{{title}}'s Blog</h2>
         <div class="blog__body">
           <div v-for="item in rssItems" :v-key="item.link">
-            <div>
-              <p>{{item.pubDate}}</p>
-              <p>{{item.title}}</p>
-              <img :src="item.enclosure?.url" />
-              <p>{{item.summary}}</p>
-              <p>{{item.link}}</p>
+            <div style="display: flex;">
+              <div v-if="item.enclosure.url" style="width: 50%; margin: 8px 8px; align-items: center;">
+                <p style="font-size: small; margin: 0 0 6px 0;">{{item.title}} ({{item.pubDate}})</p>
+                <p style="font-size: small;">{{item.summary}}<a :href="item.link" target="_blank" rel="noopener noreferrer">続き</a></p>
+              </div>
+              <div v-if="!item.enclosure.url" style="width: 100%; margin: 8px 8px; align-items: center;">
+                <p style="font-size: small; margin: 0 0 6px 0;">{{item.title}} ({{item.pubDate}})</p>
+                <p style="font-size: small;">{{item.summary}}<a :href="item.link" target="_blank" rel="noopener noreferrer">続き</a></p>
+              </div>
+              <div v-if="item.enclosure.url" style="width: 50%; margin: auto 8px; align-items: center;">
+                <img :src="item.enclosure.url" 
+                  style="height: 80%; width: 80%; object-fit: cover; object-position: 50% 50%;"/>
+              </div>
             </div>
           </div>
         </div>
