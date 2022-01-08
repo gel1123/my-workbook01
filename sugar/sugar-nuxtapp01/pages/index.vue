@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import Favicons from '~~/components/favicons.vue';
 import Logo from '~~/components/simple-logo.vue';
+import Jumbotron1 from '~~/components/jumbotron.vue';
 
 // <==================== 型情報 ====================>
 interface RssItem {
@@ -91,7 +92,7 @@ onMounted(async () => {
   <Body>
     <div class="wrapper">
       <div class="top">
-        <Logo />
+        <Logo/>
         <div class="top__description">
           <p>
             Drip CafeのCOFFEEは一杯一杯ドリップしてお出ししているので
@@ -105,13 +106,16 @@ onMounted(async () => {
             人気のビスケットとご一緒にCOFFEEタイムをお楽しみ下さい。
           </p>
         </div>
+        <Jumbotron1 />
       </div>
-      <div class="story body">
+
+      <!-- <div class="story body">
         <h2 class="story__heading">{{title}}のこだわり</h2>
         <div class="story__body text--minimum">
           ストーリー、こだわり、価値観などブランドイメージを伝える
         </div>
-      </div>
+      </div> -->
+
       <div class="about body">
         <h2 class="about__heading">{{title}}について</h2>
         <div class="about__shop-info">
