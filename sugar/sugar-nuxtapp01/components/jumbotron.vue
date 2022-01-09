@@ -26,7 +26,7 @@ const switchSrc = () => {
     overflow: hidden;
 }
 img {
-    height: 500px;
+    height: 400px;
     width: 100%;
     object-fit: cover;
     object-position: 0% top;
