@@ -269,7 +269,7 @@ footer {
     margin: 0 auto;
   }
   .blog__item {
-    width: 30%;
+    width: 33%;
   }
   .blog__item_wrapper {
     display: flex;
