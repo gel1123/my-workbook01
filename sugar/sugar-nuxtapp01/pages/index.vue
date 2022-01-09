@@ -2,6 +2,8 @@
 import Favicons from '~~/components/favicons.vue';
 import Logo from '~~/components/simple-logo.vue';
 import Jumbotron1 from '~~/components/jumbotron.vue';
+import Gallery from '~~/components/gallery.vue';
+import Modal1 from '~~/components/modal.vue';
 
 // <==================== 型情報 ====================>
 interface RssItem {
@@ -53,6 +55,14 @@ const setRssItems = (xml: string | undefined | null) => {
   item2 && rssItems.push(item2);
   item3 && rssItems.push(item3);
 }
+/** Galleryコンポーネントの画像クリック時に発火 */
+const showPicture = (src: string) => {
+  modalSrc.value = src;
+}
+/** 上記で開いたモーダルの外縁部クリック時に発火 */
+const closePicture = () => {
+  modalSrc.value = "";
+}
 // </==================== 関数 ====================>
 
 // <==================== ref || reactive ====================>
@@ -60,6 +70,8 @@ const setRssItems = (xml: string | undefined | null) => {
 const rssItems: RssItem[] = reactive([]);
 /** RSS本体のXML */
 let xml  = ref("");
+/** モーダルに表示する画像のsrc */
+const modalSrc = ref("");
 // </==================== ref || reactive ====================>
 
 // <==================== 手続き処理 ====================>
@@ -90,6 +102,7 @@ onMounted(async () => {
   <Favicons/>
   <Title>{{title}}</Title>
   <Body>
+    <Modal1 v-if="modalSrc" :src="modalSrc" @close-picture="closePicture"/>
     <div class="wrapper">
       <div class="top">
         <Logo/>
@@ -142,10 +155,10 @@ onMounted(async () => {
           </div>
         </div>
       </div>
-      <div class="menu body">
-        <h2 class="menu__heading">メニュー紹介</h2>
-        <div class="menu__body">
-          メニュー画像
+      <div class="gallery body">
+        <h2 class="gallery__heading">Gallery</h2>
+        <div class="gallery__body">
+          <Gallery @show-picture="showPicture" />
         </div>
       </div>
       <div class="blog body bottom">
@@ -195,7 +208,7 @@ onMounted(async () => {
 .about {
   background-color: rgba(255, 255, 255, 0);
 }
-.menu {
+.gallery {
   background-color: rgba(255, 255, 255, 0);
 }
 .blog {
@@ -220,7 +233,7 @@ onMounted(async () => {
 .about__address__map {
   margin: 4px auto;
 }
-.menu__body, .story__body, .blog__body {
+.story__body, .blog__body {
   border: 1px solid rgb(200, 200, 200);
   padding: 16px;
 }
