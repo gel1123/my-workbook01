@@ -1,9 +1,11 @@
-
-@font-face {
-  font-family: noto;
-  src: url(/assets/fonts/NotoSansJP-Thin.otf);
-}
 body {
   margin:0;
-  font-family: noto;
+  font-family: YuGothic, 'Yu Gothic', sans-serif;
+  font-weight: 400;
+  color: #5e5e5e;
+  font-style: normal;
+}
+h1,h2,h3,h4,h5 {
+  font-weight: 400;
+  color: #191919;
 }
