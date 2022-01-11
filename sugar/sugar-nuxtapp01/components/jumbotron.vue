@@ -30,7 +30,7 @@ img {
     width: 100%;
     object-fit: cover;
     object-position: 0% top;
-    animation: 20s ease-in 1s infinite forwards slide;
+    animation: 20s ease-in 0s infinite forwards slide;
     opacity: 0;
 }
 @keyframes slide {
