@@ -11,6 +11,9 @@ import { defineNuxtConfig } from 'nuxt3'
  * + Volar：有効化（Vue3に対応）
  */
 export default defineNuxtConfig({
+    nitro: {
+        preset: 'lambda' //<= Nuxt3をLambdaアプリケーションとして構成する設定
+    },
     typescript: {
         strict: true
     },
