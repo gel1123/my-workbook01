@@ -39,4 +39,14 @@ img {
      90% { opacity: 1; object-position:  90% top; }
     100% { opacity: 0; object-position: 100% top; }
 }
+@media screen and (min-width: 450px) {
+img {
+    height: 600px;
+    width: 100%;
+    object-fit: cover;
+    object-position: 0% top;
+    animation: 20s ease-in 0s infinite forwards slide;
+    opacity: 0;
+}
+}
 </style>
