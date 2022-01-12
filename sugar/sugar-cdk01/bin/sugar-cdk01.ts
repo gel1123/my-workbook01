@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { SugarCdk01Stack } from '../lib/sugar-cdk01-stack';
+// import { SugarCdk01Stack } from '../lib/sugar-cdk01-stack';
 import { SugarNuxt01Stack } from '../lib/sugar-nuxt01-stack';
 
 const app = new cdk.App();

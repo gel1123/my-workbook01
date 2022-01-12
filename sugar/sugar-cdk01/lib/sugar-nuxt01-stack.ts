@@ -1,7 +1,6 @@
 import { CfnOutput, RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
-import { LambdaRestApi } from "aws-cdk-lib/aws-apigateway";
-import { CloudFrontWebDistribution, experimental, LambdaEdgeEventType, OriginAccessIdentity, OriginProtocolPolicy } from "aws-cdk-lib/aws-cloudfront";
-import { Code, Function, Runtime } from "aws-cdk-lib/aws-lambda";
+import { CloudFrontWebDistribution, experimental, LambdaEdgeEventType, OriginAccessIdentity } from "aws-cdk-lib/aws-cloudfront";
+import { Code, Runtime } from "aws-cdk-lib/aws-lambda";
 import { Bucket } from "aws-cdk-lib/aws-s3";
 import { BucketDeployment, Source } from "aws-cdk-lib/aws-s3-deployment";
 import { Construct } from "constructs";
@@ -29,31 +28,23 @@ export class SugarNuxt01Stack extends Stack {
     // </--------S3-------->
 
     // <--------Lambda-------->
-    // lambda@Edgeなら、EdgeFunctionインスタンスでないと、スタック全体のリージョンとの差異がある場合にエラーになる。
-    // ※lambda@Edgeは us-east-1 リージョン限定（CloudFrontに紐づいているから）
+    // Lambda@Edgeなら、EdgeFunctionインスタンスでないと、スタック全体のリージョンとの差異がある場合にエラーになる。
+    // ※Lambda@Edgeは us-east-1 リージョン限定（CloudFrontに紐づいているから）
     // 参考にさせていただいた記事：https://www.dkrk-blog.net/aws/lambda_edge_crossregion
     const lambdaEdge = new experimental.EdgeFunction(this, "sugarHandlerEdge", {
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset("./nuxt3.output/server"),
-      handler: "index.handler"
+      handler: "edge.handler"
     });
-    // const lambdaVersion = new Version(this, "sugarHandlerVersion", {
-    //   lambda: lambdaEdge
-    // });
-    const lambda = new Function(this, "sugarHandler", {
-      runtime: Runtime.NODEJS_14_X,
-      code: Code.fromAsset("./nuxt3.output/server"),
-      handler: "index.handler"
-    });
-    const api = new LambdaRestApi(this, "sugarEndpoint", {
-      handler: lambda
-    });
-    new CfnOutput(this, "Sugar API URL", {value: api.url});
-    const apiDomainName = `${api.restApiId}.execute-api.${this.region}.amazonaws.com`;
     // </--------Lambda-------->
 
     // <--------CloudFront-------->
+    /**
+     * Behavior 0 => 
+     * Behavior 1 => 
+     */
     const distribution = new CloudFrontWebDistribution(this, "sugarCdn", {
+      defaultRootObject: "", //<= 指定なし. index.htmlはLambda@Edgeが出力する.
       originConfigs: [
         {
           s3OriginSource: {
@@ -63,24 +54,17 @@ export class SugarNuxt01Stack extends Stack {
           behaviors: [
             {
               isDefaultBehavior: true,
+              pathPattern: "*",
               lambdaFunctionAssociations: [
                 {
-                  eventType: LambdaEdgeEventType.ORIGIN_REQUEST,
+                  eventType: LambdaEdgeEventType.VIEWER_REQUEST,
                   lambdaFunction: lambdaEdge.currentVersion
                 }
               ]
-            }
-          ]
-        },
-        {
-          customOriginSource: {
-            domainName: apiDomainName,
-            originPath: "/prod",
-            originProtocolPolicy: OriginProtocolPolicy.HTTPS_ONLY
-          },
-          behaviors: [
+            },
             {
-              pathPattern: "/ssr"
+              isDefaultBehavior: false,
+              pathPattern: "/*.*",
             }
           ]
         }
@@ -88,12 +72,6 @@ export class SugarNuxt01Stack extends Stack {
     });
     new CfnOutput(this, "CF URL", {
       value: `https://${distribution.distributionDomainName}`
-    });
-    new CfnOutput(this, "Lambda SSR URL", {
-      value: `https://${distribution.distributionDomainName}/ssr`
-    });
-    new CfnOutput(this, "Lambda@Edge SSR URL", {
-      value: `https://${distribution.distributionDomainName}/edgessr`
     });
     // </--------CloudFront-------->
   }

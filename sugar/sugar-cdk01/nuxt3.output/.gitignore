@@ -1,3 +1,4 @@
 nitro.json
-server/
+server/*
+!server/edge.mjs
 public/
