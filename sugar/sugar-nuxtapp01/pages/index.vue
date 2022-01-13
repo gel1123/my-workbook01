@@ -4,7 +4,6 @@ import Logo from '~~/components/simple-logo.vue';
 import Jumbotron1 from '~~/components/jumbotron.vue';
 import Gallery from '~~/components/gallery.vue';
 import Modal1 from '~~/components/modal.vue';
-import About from './about.vue';
 
 // <==================== 型情報 ====================>
 interface RssItem {

@@ -10,7 +10,7 @@ import { Construct } from "constructs";
  * コーディングにあたって、[こちら](https://github.com/aws-samples/react-ssr-lambda/blob/main/cdk/lib/srr-stack.ts)
  * のコードを参考にさせていただきました。
  */
-export class SugarNuxt01Stack extends Stack {
+export class SugarNuxtSSR01Stack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
@@ -31,7 +31,7 @@ export class SugarNuxt01Stack extends Stack {
     // Lambda@Edgeなら、EdgeFunctionインスタンスでないと、スタック全体のリージョンとの差異がある場合にエラーになる。
     // ※Lambda@Edgeは us-east-1 リージョン限定（CloudFrontに紐づいているから）
     // 参考にさせていただいた記事：https://www.dkrk-blog.net/aws/lambda_edge_crossregion
-    const lambdaEdge = new experimental.EdgeFunction(this, "sugarHandlerEdge", {
+    const lambdaEdge = new experimental.EdgeFunction(this, "sugarEdgeHandler", {
       runtime: Runtime.NODEJS_14_X,
       code: Code.fromAsset("./nuxt3.output/server"),
       handler: "edge.handler"
