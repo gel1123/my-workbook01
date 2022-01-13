@@ -4,6 +4,7 @@ import Logo from '~~/components/simple-logo.vue';
 import Jumbotron1 from '~~/components/jumbotron.vue';
 import Gallery from '~~/components/gallery.vue';
 import Modal1 from '~~/components/modal.vue';
+import About from './about.vue';
 
 // <==================== 型情報 ====================>
 interface RssItem {
@@ -76,8 +77,15 @@ const modalSrc = ref("");
 
 // <==================== 手続き処理 ====================>
   // ----------------- ここからSSR用 ---------------
-const { data } = await useFetch('https://dripcafe.ti-da.net/index.xml');
-xml.value = (data.value ? data.value : "") as string;
+if (useState<string>("xmlValue").value) {
+  xml = useState<string>("xmlValue");
+} else {
+  const { data } = await useFetch('https://dripcafe.ti-da.net/index.xml');
+  xml.value = (data.value ? data.value : "") as string;
+  useState<string>("xmlValue", () => {
+    return xml.value;
+  });
+}
   // ----------------- ここまでSSR用 ---------------
   // ----------------- ここからSSG用 ---------------
   // SSGでCORSの壁を突破したいなら、下記のように仲介役を挟む必要がある
@@ -93,7 +101,19 @@ xml.value = (data.value ? data.value : "") as string;
 
 // <==================== hook ====================>
 onMounted(async () => {
+  // RSS
   setRssItems(xml.value);
+  // レイアウト演出
+  window.addEventListener('scroll', () => {
+    const element = document.querySelector("a");
+    const rect = element?.getBoundingClientRect();
+    const isInView = rect && 0 < rect.bottom && rect.top < window.innerHeight;
+    if (isInView) {
+      !element?.classList?.contains("inView") && element?.classList.add("inView");
+    } else {
+      element?.classList?.contains("inView") && element?.classList.remove("inView");
+    }
+  });
 });
 // </==================== hook ====================>
 
@@ -123,16 +143,16 @@ onMounted(async () => {
           <Jumbotron1 />
         </div>
 
-        <!-- <div class="story body">
-          <h2 class="story__heading">{{title}}のこだわり</h2>
-          <div class="story__body text--minimum">
-            ストーリー、こだわり、価値観などブランドイメージを伝える
-          </div>
-        </div> -->
-
         <div class="about body">
           <h2 class="about__heading">{{title}}について</h2>
           <div class="about__shop-info">
+            <div>
+              <p>豊崎ライフスタイルセンターTOMITONの1階で営業しています。自家焙煎珈琲と手作り氷ぜんざいが人気のワゴンカフェです。</p>
+              <p>一杯一杯丁寧にいれたコーヒーをお楽しみいただけます。青緑色ベースの大きなワゴンが目印です！</p>
+              <p style="font-size: medium;">
+                <a href="/about" style="color: cornflowerblue;">当店についてもっと知りたい方はこちら >></a>
+              </p>
+            </div>
             <h3 class="about__shop-info__heading">店舗情報</h3>
             <table>
               <tr>
@@ -145,7 +165,7 @@ onMounted(async () => {
               </tr>
             </table>
             <div class="about__address">
-              <h4 class="about__address__heading">住所</h4>
+              <h3 class="about__address__heading">所在地</h3>
               <p>〒901-0225 沖縄県豊見城市豊崎１−４１１<br>
               豊崎ライフスタイルセンター TOMITON 1階</p>
               <div class="about__address__map">
@@ -162,7 +182,7 @@ onMounted(async () => {
             <Gallery @show-picture="showPicture" />
           </div>
         </div>
-        <div class="blog body bottom">
+        <div class="blog body bottom" v-if="rssItems.length > 0">
           <h2 class="blog__heading">{{title}}'s Blog</h2>
           <div class="blog__body">
             <div class="blog__item_wrapper">
@@ -193,6 +213,9 @@ onMounted(async () => {
   </Body>
 </template>
 <style scoped>
+.inView {
+  animation: anime01 1s ease-out 0s 1 forwards;
+}
 .wrapper {
   opacity: 0;
   animation: anime01 1s ease-out 0s 1 forwards;
