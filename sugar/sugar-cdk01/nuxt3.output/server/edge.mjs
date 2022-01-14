@@ -19,6 +19,12 @@ async function handler(event, context) {
   const res = await output.handler(e, context);
   return {
     status: res.statusCode,
+    headers: {
+      'content-type': [{
+          key: 'Content-Type',
+          value: res.headers['content-type']
+      }]
+  },
     body: res.body
   }
 }
