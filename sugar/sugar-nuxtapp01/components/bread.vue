@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 const path = useRoute().path;
-console.log(path);
 </script>
 <template>
 <div class="bread_root">
