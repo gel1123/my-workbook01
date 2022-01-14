@@ -75,6 +75,8 @@ const modalSrc = ref("");
 // </==================== ref || reactive ====================>
 
 // <==================== 手続き処理 ====================>
+const $config = useRuntimeConfig();
+const siteUrl = $config.siteUrl;
   // ----------------- ここからSSR用 ---------------
 if (useState<string>("xmlValue").value) {
   xml = useState<string>("xmlValue");
@@ -89,7 +91,6 @@ if (useState<string>("xmlValue").value) {
   // ----------------- ここからSSG用 ---------------
   // SSGでCORSの壁を突破したいなら、下記のように仲介役を挟む必要がある
   // 参考：https://www.to-r.net/media/note-rss/
-  // var $config = useRuntimeConfig();
   // const endpoint: string = $config.rssEndpoint; //<= https://dripcafe.ti-da.net/index.xml からRSS取得
   // const res = await fetch(endpoint);
   // if (res.ok) {
@@ -120,6 +121,18 @@ onMounted(async () => {
 <template>
   <Favicons/>
   <Title>{{title}}</Title>
+  <!-- SEO -->
+  <Meta name="description" content="自家焙煎珈琲と手作り氷ぜんざいが人気のワゴンカフェです。一杯一杯丁寧にいれたコーヒーをお楽しみいただけます。ほかにもコーヒーベースの甘くて美味しい飲み物や、手作りの焼き菓子もあるので、ちょっと一息つきたいときにぜひお立ち寄りください。" />
+  <!-- OGP -->
+  <Meta property="og:site_name" content="Drip Cafe" />
+  <Meta property="og:title" content="Drip Cafe" />
+  <Meta property="og:description" content="自家焙煎珈琲と手作り氷ぜんざいが人気のワゴンカフェです。一杯一杯丁寧にいれたコーヒーをお楽しみいただけます。ほかにもコーヒーベースの甘くて美味しい飲み物や、手作りの焼き菓子もあるので、ちょっと一息つきたいときにぜひお立ち寄りください。" />
+  <Meta property="og:type" content="website" />
+  <Meta property="og:url" :content="siteUrl" />
+  <Meta property="og:image" :content="'/img/ogp01_630-1200.jpeg'" />
+  <Meta name="twitter:card" content="summary" />
+  <Meta name="twitter:site" :content="siteUrl" />
+  <Meta name="twitter:image" :content="'/img/ogp01_630-1200.jpeg'" />
   <Body>
     <Modal1 v-if="modalSrc" :src="modalSrc" @close-picture="closePicture"/>
     <div class="wrapper_wrapper">

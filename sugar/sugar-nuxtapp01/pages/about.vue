@@ -1,19 +1,22 @@
 <script lang="ts" setup>
-let position01 = ref(0);
+import Bread1 from '~~/components/bread.vue';
+let position01 = ref(10);
 let position02 = ref(0);
 onMounted(async() => {
     window.addEventListener('scroll', () => {
-        const y = window.scrollY/window.innerHeight*100;
-        position01.value = y*0.3;
-        position02.value = y*0.28;
+        const y = window.scrollY/window.document.documentElement.scrollHeight*100;
+        position01.value = 10+y*0.3;
+        position02.value = y*0.7;
     });
 });
 </script>
 <template>
+    <Favicons/>
     <Title>Drip Cafe</Title>
     <div class="wrapper_wrapper">
+        <Bread1/>
         <div class="wrapper">
-            <h2>About</h2>
+            <h2>About Drip Cafe</h2>
             <div class="contents">
                 <h3>Drip Cafeってどんなお店？</h3>
                 <img class="imgtype1" :src="'/img/about/about01.jpg'" />
@@ -36,7 +39,7 @@ onMounted(async() => {
                         :style="`object-position:${position01}%`"/>
                     <div>
                         <br>
-                        <p>Drip Cafeでは自己焙煎にこだわっています。</p>
+                        <p>Drip Cafeでは自家焙煎にこだわっています。</p>
                         <br>
                         <p>豆の特徴、</p>
                         <p>焙煎の度合い。</p>
@@ -52,7 +55,7 @@ onMounted(async() => {
                 <h3>ロゴマークについて</h3>
                 <img class="imgtype3" :src="'/img/simple-logo_110-265.png'" />
                 <div>
-                    <p>人気の自己焙煎珈琲と、手作りの氷ぜんざいをモチーフに、ドリップと氷の結晶で形作りました。</p>
+                    <p>人気の自家焙煎珈琲と、手作りの氷ぜんざいをモチーフに、ドリップと氷の結晶で形作りました。</p>
                     <p>苦味は控え目で程良いコクのあるコーヒーと、押麦をつかった少しとろみのあるぜんざいをお楽しみください。</p>
                 </div>
             </div>

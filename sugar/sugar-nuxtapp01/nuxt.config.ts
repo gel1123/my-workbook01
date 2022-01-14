@@ -19,7 +19,8 @@ export default defineNuxtConfig({
     },
     css: ['~/assets/css/style.css'],
     publicRuntimeConfig: {
-        rssEndpoint: process.env.RSS_ENDPOINT
+        rssEndpoint: process.env.RSS_ENDPOINT,
+        siteUrl: process.env.SITE_URL
     },
     ssr: true, //<= ビルドモードの指定。trueなら SSR or SSG. falseなら SPA. デフォルトでtrue.
     target: 'server' //<= ビルドモードの指定。'server'なら SSR. 'static'なら SSG or SPA. デフォルトで 'server'.
