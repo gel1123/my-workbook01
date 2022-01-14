@@ -1,4 +1,4 @@
-下記コマンドでnuxt3のビルド資材をここに持って来る。
+下記コマンドでnuxt3のビルド資材をここに持って来る（コマンドは作者の個人PCの環境を前提にしています）。
 
 ただし、serverディレクトリ直下の「edge.mjs」は Nuxt3のLambda向けリソースをLambda@Edge向け
 リソースに置き換えるためにこのリポジトリで管理している資材であり、
@@ -7,7 +7,19 @@
 ```
 # ※ちなみに -f を無効化する「-i」オプションがcpエイリアスに設定されているので、
 # エイリアスを無視するために、cpコマンドの前にバックスラッシュを配置している。
-% \cp -rf ~/my-repo/my-workbook01/sugar/sugar-nuxtapp01/.output/* ~/my-repo/my-workbook01/sugar/sugar-cdk01/nuxt3.output
+
+rm -f nuxt3.output/nitro.json
+rm -rf nuxt3.output/public
+rm -rf nuxt3.output/server/chunks
+rm -rf nuxt3.output/server/node_modules
+rm -f nuxt3.output/server/index.mjs
+\cp -rf ~/my-repo/my-workbook01/sugar/sugar-nuxtapp01/.output/* ~/my-repo/my-workbook01/sugar/sugar-cdk01/nuxt3.output
+```
+
+その上で下記でビルド＆デプロイ実行（プロファイル名はダミーです）
+
+```
+npm run build && cdk deploy --profile xxxxxxx
 ```
 
 ____________________________
