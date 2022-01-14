@@ -130,8 +130,11 @@ onMounted(async () => {
   <Meta property="og:type" content="website" />
   <Meta property="og:url" :content="siteUrl" />
   <Meta property="og:image" :content="`${siteUrl}/img/ogp01_630-1200.jpeg`" />
-  <Meta name="twitter:card" content="summary" />
+  
   <Meta name="twitter:site" :content="siteUrl" />
+  <Meta name="twitter:card" content="summary_large_image" />
+  <Meta name="twitter:title" content="Drip Cafe" />
+  <Meta name="twitter:description" content="自家焙煎珈琲と手作り氷ぜんざいが人気のワゴンカフェです。一杯一杯丁寧にいれたコーヒーをお楽しみいただけます。ほかにもコーヒーベースの甘くて美味しい飲み物や、手作りの焼き菓子もあるので、ちょっと一息つきたいときにぜひお立ち寄りください。" />
   <Meta name="twitter:image" :content="`${siteUrl}/img/ogp01_630-1200.jpeg`" />
   <Body>
     <Modal1 v-if="modalSrc" :src="modalSrc" @close-picture="closePicture"/>

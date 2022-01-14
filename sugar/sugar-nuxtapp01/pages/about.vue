@@ -24,8 +24,10 @@ onMounted(async() => {
     <Meta property="og:type" content="article" />
     <Meta property="og:url" :content="`${siteUrl}/about`" />
     <Meta property="og:image" :content="`${siteUrl}/img/about/about01.jpg`" />
-    <Meta name="twitter:card" content="summary" />
     <Meta name="twitter:site" :content="`${siteUrl}/about`" />
+    <Meta name="twitter:card" content="summary_large_image" />
+    <Meta name="twitter:title" content="Drip Cafe" />
+    <Meta name="twitter:description" content="Drip Cafeでは自家焙煎にこだわっています。豆の特徴、焙煎の度合い。試行錯誤の末、それらの要素がよく調和するオリジナルブレンドをご提供しています。沖縄南部の観光スポットあしびなーの隣「豊崎ライフセンターTOMITON」で営業中です！" />
     <Meta name="twitter:image" :content="`${siteUrl}/img/about/about01.jpg`" />
     <Body>
         <div class="wrapper_wrapper">
