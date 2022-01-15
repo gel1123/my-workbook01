@@ -32,8 +32,8 @@ onMounted(async() => {
     <Body>
         <div class="wrapper_wrapper">
             <div class="wrapper">
-                <h2>About Drip Cafe</h2>
                 <Bread1/>
+                <h2>About Drip Cafe</h2>
                 <div class="contents">
                     <h3>Drip Cafeってどんなお店？</h3>
                     <img class="imgtype1" :src="'/img/about/about01.jpg'" />

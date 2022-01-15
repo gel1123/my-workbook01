@@ -82,6 +82,7 @@ if (useState<string>("xmlValue").value) {
   xml = useState<string>("xmlValue");
 } else {
   const { data } = await useFetch('https://dripcafe.ti-da.net/index.xml');
+  // const { data } = await useFetch('https://dripcafe.ti-da.net/index.xml');
   xml.value = (data.value ? data.value : "") as string;
   useState<string>("xmlValue", () => {
     return xml.value;
@@ -133,7 +134,7 @@ onMounted(async () => {
   
   <Meta name="twitter:site" :content="siteUrl" />
   <Meta name="twitter:card" content="summary_large_image" />
-  <Meta name="twitter:title" content="Drip Cafe" />
+  <Meta name="twitter:title" content="Drip Cafe | 自家焙煎珈琲と手作り氷ぜんざいが人気のお店です。沖縄県豊崎「TOMITON」で営業中！" />
   <Meta name="twitter:description" content="自家焙煎珈琲と手作り氷ぜんざいが人気のワゴンカフェです。一杯一杯丁寧にいれたコーヒーをお楽しみいただけます。ほかにもコーヒーベースの甘くて美味しい飲み物や、手作りの焼き菓子もあるので、ちょっと一息つきたいときにぜひお立ち寄りください。" />
   <Meta name="twitter:image" :content="`${siteUrl}/img/ogp01_630-1200.jpeg`" />
   <Body>
@@ -149,7 +150,7 @@ onMounted(async () => {
             </p>
             <p>
               他にも沖縄で育った琉球紅茶シリーズ、
-              夏にはかかせないスムージードリンクなどもございます。
+              押麦をつかった少しとろみのある氷ぜんざいなどもございます。
             </p>
             <p>
               人気のビスケットとご一緒にCOFFEEタイムをお楽しみ下さい。
